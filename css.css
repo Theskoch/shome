@@ -78,6 +78,12 @@ body {
   background: rgba(255, 255, 255, 0.35);
 }
 
+.icon-button.is-edit-active {
+  background: rgba(63, 191, 102, 0.35);
+  border-color: rgba(63, 191, 102, 0.8);
+  color: #eafff2;
+}
+
 /* Сетка карточек сервисов */
 .services-grid {
   display: flex;
@@ -148,6 +154,32 @@ body {
   opacity: 0;
   pointer-events: none;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.service-card__edit {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #3fbf66;
+  color: #ffffff;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.services-grid.is-edit-mode .service-card__edit {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.services-grid.is-edit-mode .service-card:hover {
+  transform: scale(0.98);
 }
 
 .services-grid.is-removal-mode .service-card {
