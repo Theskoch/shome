@@ -489,6 +489,16 @@
         isModal: service.isModal ?? false
       });
 
+      const resolveIconUrl = icon => {
+        if (!icon) {
+          return 'assets/images/tool.png';
+        }
+        if (icon.startsWith('/') || icon.startsWith('http://') || icon.startsWith('https://')) {
+          return icon;
+        }
+        return `assets/images/${icon}`;
+      };
+
       const renderServices = () => {
         servicesGrid.innerHTML = '';
         services.forEach(service => {
@@ -515,7 +525,7 @@
         const image = document.createElement('img');
         image.className = 'service-card__image';
         image.alt = service.title;
-        image.src = service.icon || 'assets/images/tool.png';
+        image.src = resolveIconUrl(service.icon);
         iconWrapper.appendChild(image);
 
         const label = document.createElement('span');
@@ -582,6 +592,12 @@
           } else {
             services = [];
           }
+
+          services = services.map(service => ({
+            ...service,
+            icon: service.icon ? service.icon.replace(/^\/?assets\/images\//, '') : ''
+          }));
+
           renderServices();
         } catch (error) {
           console.error(error);

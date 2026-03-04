@@ -38,6 +38,33 @@ def save_services(data):
     SERVICES_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def normalize_icon_path(icon: str) -> str:
+    if not icon:
+        return ""
+    if icon.startswith("/uploads/"):
+        return icon
+    if icon.startswith("/assets/images/"):
+        return icon
+    if icon.startswith("assets/images/"):
+        return f"/{icon}"
+    if icon.startswith("http://") or icon.startswith("https://"):
+        return icon
+    return f"/assets/images/{icon}"
+
+
+def cleanup_unused_uploads(services_data: list[dict]) -> None:
+    ensure_storage()
+    used_files = set()
+    for service in services_data:
+        icon = normalize_icon_path(str(service.get("icon", "")))
+        if icon.startswith("/uploads/"):
+            used_files.add(icon.replace("/uploads/", ""))
+
+    for file_path in UPLOADS_DIR.iterdir():
+        if file_path.is_file() and file_path.name not in used_files:
+            file_path.unlink(missing_ok=True)
+
+
 def load_settings():
     ensure_storage()
     if not SETTINGS_FILE.exists():
@@ -69,12 +96,23 @@ def services():
         if items is None:
             return jsonify({"initialized": False, "items": []})
         return jsonify({"initialized": True, "items": items})
-
     data = request.get_json(silent=True)
     if not isinstance(data, list):
         return jsonify({"success": False, "message": "Неверный формат данных"}), 400
 
-    save_services(data)
+    normalized = []
+    for service in data:
+        if not isinstance(service, dict):
+            continue
+        normalized.append(
+            {
+                **service,
+                "icon": normalize_icon_path(str(service.get("icon", ""))),
+            }
+        )
+
+    save_services(normalized)
+    cleanup_unused_uploads(normalized)
     return jsonify({"success": True})
 
 
