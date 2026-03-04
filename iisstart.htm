@@ -14,6 +14,9 @@
       <!-- Кнопки управления карточками -->
       <div class="page-actions" aria-label="Действия со списком">
         <button class="icon-button" id="open-add-service" type="button" aria-label="Добавить сервис">
+          ➕
+        </button>
+        <button class="icon-button" id="toggle-edit-mode" type="button" aria-label="Редактировать сервисы">
           ✏️
         </button>
         <button class="icon-button" id="toggle-remove-mode" type="button" aria-label="Удалить сервисы">
@@ -249,7 +252,7 @@
           &times;
         </button>
         <form class="service-form" id="service-form">
-          <h2 class="service-form__title">Добавить новый сервис</h2>
+          <h2 class="service-form__title" id="service-form-title">Добавить новый сервис</h2>
           <label class="service-form__field">
             <span class="service-form__label">Название</span>
             <input class="service-form__input" type="text" name="title" required />
@@ -266,9 +269,10 @@
               <input class="upload-dropzone__input" type="file" id="icon-file" accept="image/*" />
             </div>
             <input type="hidden" id="icon-url" name="icon" />
+            <input type="hidden" id="service-id" name="serviceId" />
             <div class="upload-preview" id="upload-preview" aria-live="polite"></div>
           </div>
-          <button class="service-form__submit" type="submit">Добавить</button>
+          <button class="service-form__submit" id="service-form-submit" type="submit">Добавить</button>
         </form>
       </div>
     </div>
@@ -340,17 +344,23 @@
 
       // Управление добавлением и удалением карточек
       const addServiceButton = document.getElementById('open-add-service');
+      const editModeButton = document.getElementById('toggle-edit-mode');
       const addServiceModal = document.getElementById('add-service-modal');
       const closeAddService = document.getElementById('close-add-service');
       const backgroundButton = document.getElementById('open-background-picker');
       const backgroundModal = document.getElementById('background-modal');
       const closeBackgroundModal = document.getElementById('close-background-modal');
+      const serviceForm = document.getElementById('service-form');
+      const serviceFormTitle = document.getElementById('service-form-title');
+      const serviceFormSubmit = document.getElementById('service-form-submit');
+      const serviceIdInput = document.getElementById('service-id');
+      const titleInput = serviceForm.querySelector('input[name="title"]');
+      const urlInput = serviceForm.querySelector('input[name="url"]');
       const backgroundForm = document.getElementById('background-form');
       const backgroundDropzone = document.getElementById('background-dropzone');
       const backgroundFileInput = document.getElementById('background-file');
       const backgroundPreview = document.getElementById('background-preview');
       const backgroundUrlInput = document.getElementById('background-url');
-      const serviceForm = document.getElementById('service-form');
       const servicesGrid = document.getElementById('services-grid');
       const removeModeButton = document.getElementById('toggle-remove-mode');
       const dropzone = document.getElementById('upload-dropzone');
@@ -381,6 +391,9 @@
       });
       servicesGrid.innerHTML = '';
       let isRemovalMode = false;
+      let isEditMode = false;
+      let editingServiceId = '';
+      let editingServiceIcon = '';
 
       const openModal = modal => {
         modal.classList.add('is-active');
@@ -392,8 +405,43 @@
         modal.setAttribute('aria-hidden', 'true');
       };
 
-      addServiceButton.addEventListener('click', () => openModal(addServiceModal));
-      closeAddService.addEventListener('click', () => closeModal(addServiceModal));
+      const resetServiceForm = () => {
+        serviceForm.reset();
+        iconUrlInput.value = '';
+        serviceIdInput.value = '';
+        editingServiceId = '';
+        editingServiceIcon = '';
+        setPreview('', '');
+        serviceFormTitle.textContent = 'Добавить новый сервис';
+        serviceFormSubmit.textContent = 'Добавить';
+      };
+
+      const openAddServiceForm = () => {
+        resetServiceForm();
+        openModal(addServiceModal);
+      };
+
+      const openEditServiceForm = service => {
+        resetServiceForm();
+        editingServiceId = service.id;
+        editingServiceIcon = service.icon || '';
+        serviceIdInput.value = service.id;
+        titleInput.value = service.title;
+        urlInput.value = service.url;
+        if (service.icon) {
+          iconUrlInput.value = service.icon;
+          setPreview(service.icon, service.title);
+        }
+        serviceFormTitle.textContent = 'Редактировать сервис';
+        serviceFormSubmit.textContent = 'Сохранить';
+        openModal(addServiceModal);
+      };
+
+      addServiceButton.addEventListener('click', openAddServiceForm);
+      closeAddService.addEventListener('click', () => {
+        closeModal(addServiceModal);
+        resetServiceForm();
+      });
 
       backgroundButton.addEventListener('click', () => openModal(backgroundModal));
       closeBackgroundModal.addEventListener('click', () => closeModal(backgroundModal));
@@ -401,6 +449,7 @@
       addServiceModal.addEventListener('click', event => {
         if (event.target === addServiceModal) {
           closeModal(addServiceModal);
+          resetServiceForm();
         }
       });
 
@@ -410,10 +459,26 @@
         }
       });
 
+      editModeButton.addEventListener('click', () => {
+        isEditMode = !isEditMode;
+        servicesGrid.classList.toggle('is-edit-mode', isEditMode);
+        editModeButton.classList.toggle('is-active', isEditMode);
+        if (isEditMode) {
+          isRemovalMode = false;
+          servicesGrid.classList.remove('is-removal-mode');
+          removeModeButton.classList.remove('is-active');
+        }
+      });
+
       removeModeButton.addEventListener('click', () => {
         isRemovalMode = !isRemovalMode;
         servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
         removeModeButton.classList.toggle('is-active', isRemovalMode);
+        if (isRemovalMode) {
+          isEditMode = false;
+          servicesGrid.classList.remove('is-edit-mode');
+          editModeButton.classList.remove('is-active');
+        }
       });
 
       const normalizeService = service => ({
@@ -652,26 +717,36 @@
         const title = titleRaw ? titleRaw.toString().trim() : '';
         const url = urlRaw ? urlRaw.toString().trim() : '';
         const icon = iconRaw ? iconRaw.toString().trim() : '';
+        const resolvedIcon = icon || editingServiceIcon;
 
         if (!title || !url) {
           return;
         }
 
-        services.push({
-          id: generateId(),
-          title,
-          url,
-          icon,
-          isModal: false
-        });
+        if (editingServiceId) {
+          const index = services.findIndex(service => service.id === editingServiceId);
+          if (index !== -1) {
+            services[index] = {
+              ...services[index],
+              title,
+              url,
+              icon: resolvedIcon
+            };
+          }
+        } else {
+          services.push({
+            id: generateId(),
+            title,
+            url,
+            icon,
+            isModal: false
+          });
+        }
 
         await saveServices();
         renderServices();
-
-        serviceForm.reset();
-        iconUrlInput.value = '';
-        setPreview('', '');
         closeModal(addServiceModal);
+        resetServiceForm();
       });
 
       servicesGrid.addEventListener('click', async event => {
@@ -690,6 +765,15 @@
         }
 
         if (isRemovalMode) {
+          return;
+        }
+
+        if (isEditMode) {
+          const id = card.id;
+          const service = services.find(item => item.id === id);
+          if (service && !service.isModal) {
+            openEditServiceForm(service);
+          }
           return;
         }
 
