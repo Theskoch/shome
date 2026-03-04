@@ -368,13 +368,17 @@
         return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
       };
 
-      const initialServices = Array.from(servicesGrid.querySelectorAll('.service-card')).map(card => ({
-        id: card.id || generateId(),
-        title: card.querySelector('.service-card__label')?.textContent?.trim() || 'Без названия',
-        url: card.dataset.url || '',
-        icon: card.querySelector('.service-card__image')?.getAttribute('src') || '',
-        isModal: card.id === 'open-kuma-modal'
-      }));
+      const initialServices = Array.from(servicesGrid.querySelectorAll('.service-card')).map(card => {
+        const label = card.querySelector('.service-card__label');
+        const image = card.querySelector('.service-card__image');
+        return {
+          id: card.id || generateId(),
+          title: label ? (label.textContent || '').trim() : 'Без названия',
+          url: card.dataset.url || '',
+          icon: image ? image.getAttribute('src') || '' : '',
+          isModal: card.id === 'open-kuma-modal'
+        };
+      });
       servicesGrid.innerHTML = '';
       let isRemovalMode = false;
 
@@ -642,9 +646,12 @@
       serviceForm.addEventListener('submit', async event => {
         event.preventDefault();
         const formData = new FormData(serviceForm);
-        const title = formData.get('title')?.toString().trim();
-        const url = formData.get('url')?.toString().trim();
-        const icon = formData.get('icon')?.toString().trim();
+        const titleRaw = formData.get('title');
+        const urlRaw = formData.get('url');
+        const iconRaw = formData.get('icon');
+        const title = titleRaw ? titleRaw.toString().trim() : '';
+        const url = urlRaw ? urlRaw.toString().trim() : '';
+        const icon = iconRaw ? iconRaw.toString().trim() : '';
 
         if (!title || !url) {
           return;

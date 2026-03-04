@@ -19,7 +19,11 @@ body {
   padding-top: 30px;
   overflow: hidden;
   color: #ffffff;
-  font-family: "Nexa Light", "Segoe UI", sans-serif;
+  font-family: "Nexa Light", sans-serif;
+}
+
+* {
+  font-family: "Nexa Light", sans-serif;
 }
 
 /* Контейнер страницы */
@@ -213,7 +217,6 @@ body {
   flex-direction: column;
   gap: 18px;
   color: #1a1a1a;
-  font-family: "Segoe UI", sans-serif;
 }
 
 .service-form__title {
@@ -356,7 +359,6 @@ body {
   font-weight: bold;
   color: #000000;
   transition: 1s;
-  font-family: "Segoe UI", sans-serif;
 }
 
 .light-overlay__text.is-visible {
