@@ -84,6 +84,12 @@ body {
   color: #eafff2;
 }
 
+.icon-button.is-remove-active {
+  background: rgba(217, 75, 75, 0.35);
+  border-color: rgba(217, 75, 75, 0.85);
+  color: #ffecec;
+}
+
 /* Сетка карточек сервисов */
 .services-grid {
   display: flex;
@@ -159,7 +165,7 @@ body {
 .service-card__edit {
   position: absolute;
   top: -10px;
-  left: -10px;
+  right: -10px;
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -211,7 +217,7 @@ body {
 }
 
 .modal {
-  background: #ffffff;
+  background: #1a1a1a;
   border-radius: 18px;
   width: 90vw;
   height: 85vh;
@@ -228,7 +234,7 @@ body {
   cursor: pointer;
   border: none;
   background: none;
-  color: #222222;
+  color: #ffffff;
 }
 
 .modal__frame {
@@ -248,7 +254,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .service-form__title {
@@ -264,35 +270,41 @@ body {
 
 .service-form__label {
   font-size: 14px;
-  color: #3a3a3a;
+  color: #d6d6d6;
 }
 
 .service-form__input {
-  border: 1px solid #d8d8d8;
+  border: 1px solid #3a3a3a;
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 14px;
+  background: #2a2a2a;
+  color: #ffffff;
 }
 
 .service-form__submit {
   border: none;
   border-radius: 12px;
   padding: 12px 16px;
-  background: #1a1a1a;
+  background: #3fbf66;
   color: #ffffff;
   font-size: 15px;
   cursor: pointer;
 }
 
+.service-form__submit:hover {
+  background: #36aa5a;
+}
+
 /* Зона загрузки иконки */
 .upload-dropzone {
-  border: 2px dashed #c8c8c8;
+  border: 2px dashed #444444;
   border-radius: 14px;
   padding: 18px;
   text-align: center;
   cursor: pointer;
-  background: #f6f6f6;
-  color: #555555;
+  background: #262626;
+  color: #d0d0d0;
   position: relative;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -306,7 +318,7 @@ body {
   display: block;
   font-size: 12px;
   margin-top: 4px;
-  color: #777777;
+  color: #a7a7a7;
 }
 
 .upload-dropzone__input {
@@ -317,8 +329,8 @@ body {
 }
 
 .upload-dropzone.is-dragover {
-  border-color: #1a1a1a;
-  background: #e8e8e8;
+  border-color: #3fbf66;
+  background: #1f1f1f;
 }
 
 .upload-dropzone.is-loading {
@@ -334,7 +346,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f2f2f2;
+  background: #2a2a2a;
   border-radius: 12px;
   padding: 10px;
 }
@@ -344,13 +356,13 @@ body {
   height: 40px;
   object-fit: contain;
   border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #e1e1e1;
+  background: #1b1b1b;
+  border: 1px solid #3a3a3a;
 }
 
 .upload-preview__name {
   font-size: 13px;
-  color: #444444;
+  color: #dddddd;
 }
 
 /* Пасхалка: светлая тема */

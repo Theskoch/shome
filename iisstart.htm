@@ -475,6 +475,7 @@
         isRemovalMode = !isRemovalMode;
         servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
         removeModeButton.classList.toggle('is-active', isRemovalMode);
+        removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
         if (isRemovalMode) {
           isEditMode = false;
           servicesGrid.classList.remove('is-edit-mode');
