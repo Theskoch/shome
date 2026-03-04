@@ -1,0 +1,170 @@
+[
+  {
+    "id": "id-mmchg2ai-81o1en",
+    "title": "vCenter",
+    "url": "https://vcenter.home.local",
+    "icon": "ESXi.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-ca4o2r",
+    "title": "ESXi 1",
+    "url": "http://100.100.1.11/ui/#/login",
+    "icon": "kisspng-vmware-esxi-vmware-vsphere-vmdk-virtual-machine-telegram-5aba0e364c73b1.8059877815221427743132.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-fy30ku",
+    "title": "ESXi 2",
+    "url": "http://100.100.1.12/ui/#/login",
+    "icon": "kisspng-vmware-esxi-vmware-vsphere-vmdk-virtual-machine-telegram-5aba0e364c73b1.8059877815221427743132.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-rgju67",
+    "title": "Zabbix",
+    "url": "https://zabbix.home.local",
+    "icon": "Zabbix_logo.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-amh52k",
+    "title": "Omada",
+    "url": "https://omada.home.local/",
+    "icon": "omada-icon-2048x2048-a5bziim5.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-jbflqh",
+    "title": "Nginx Proxy Manager",
+    "url": "https://proxy.home.local/login",
+    "icon": "nginxproxy.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-kgkt54",
+    "title": "XUI",
+    "url": "http://188.253.16.197:54567/ajshfpiuaherpouighaeirg56aerh856srth486serth846aer/gkujhawefiuhaerg87234y5huhqf98q30hrg0q8h359g8hq9358hg9q8h34gp9q3p948htgq384g/xui/",
+    "icon": "xray.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-6e2ljl",
+    "title": "Hestia CP",
+    "url": "https://100.100.10.119:8083/",
+    "icon": "hestia2x.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-xnzs2k",
+    "title": "Webmail",
+    "url": "https://webmail.tspco.ru/",
+    "icon": "email.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-2b31t8",
+    "title": "Service Desk",
+    "url": "https://sd.tspco.ru/",
+    "icon": "hesk.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-71ixjn",
+    "title": "Home Assistant",
+    "url": "http://10.20.0.2:8123/",
+    "icon": "homeasist.jpg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-ruh04c",
+    "title": "Nextcloud",
+    "url": "http://hop.theskoch.ru/",
+    "icon": "nextcloud.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-yr2gxa",
+    "title": "OpenWrt",
+    "url": "http://192.168.69.2/",
+    "icon": "openwrt.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-oj3tdv",
+    "title": "Wiki",
+    "url": "https://wiki.theskoch.ru/",
+    "icon": "wiki.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-313uy0",
+    "title": "IT Tools",
+    "url": "https://service.theskoch.ru/",
+    "icon": "tool.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-kgfmp7",
+    "title": "Vaultwarden",
+    "url": "https://vault.theskoch.ru/",
+    "icon": "Vaultwarden.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-25jgup",
+    "title": "Prometheus",
+    "url": "http://100.100.10.101:9090/query",
+    "icon": "Prometheus_software_logo.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-3q0plq",
+    "title": "Grafana",
+    "url": "http://100.100.10.101:3000/login",
+    "icon": "grafana.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-08ab4m",
+    "title": "n8n",
+    "url": "http://100.100.10.112:5678/",
+    "icon": "n8n-color.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-h1o8p8",
+    "title": "Admiral",
+    "url": "http://100.100.10.112:8282/",
+    "icon": "admiral.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-ddjape",
+    "title": "Trilium Notes",
+    "url": "http://100.100.10.113:8080/",
+    "icon": "trilium.svg",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-4h638b",
+    "title": "Termix",
+    "url": "https://termix.home.local/",
+    "icon": "termix.png",
+    "isModal": false
+  },
+  {
+    "id": "id-mmchg2ai-yfu38s",
+    "title": "OpenSpeedTest",
+    "url": "http://speedtest.home.local/",
+    "icon": "OST.png",
+    "isModal": false
+  },
+  {
+    "id": "open-kuma-modal",
+    "title": "Uptime Kuma",
+    "url": "",
+    "icon": "Uptime-Kuma-Logo.png",
+    "isModal": true
+  }
+]

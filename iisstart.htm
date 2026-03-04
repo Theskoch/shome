@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>Панель домашних сервисов</title>
+    <link rel="stylesheet" href="css.css" />
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <main class="page">
+      <!-- Заголовок страницы -->
+      <h1 class="page-title">Панель домашних сервисов</h1>
+
+      <!-- Кнопки управления карточками -->
+      <div class="page-actions" aria-label="Действия со списком">
+        <button class="icon-button" id="open-add-service" type="button" aria-label="Добавить сервис">
+          ✏️
+        </button>
+        <button class="icon-button" id="toggle-remove-mode" type="button" aria-label="Удалить сервисы">
+          🗑️
+        </button>
+        <button class="icon-button" id="open-background-picker" type="button" aria-label="Сменить фон">
+          🖼️
+        </button>
+      </div>
+
+      <!-- Сетка карточек с сервисами -->
+      <section class="services-grid" id="services-grid" aria-label="Список сервисов">
+        <button class="service-card" type="button" data-url="https://vcenter.home.local">
+          <span class="service-card__icon">
+            <img src="assets/images/ESXi.svg" class="service-card__image" alt="vCenter" />
+          </span>
+          <span class="service-card__label">vCenter</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.1.11/ui/#/login">
+          <span class="service-card__icon">
+            <img
+              src="assets/images/kisspng-vmware-esxi-vmware-vsphere-vmdk-virtual-machine-telegram-5aba0e364c73b1.8059877815221427743132.png"
+              class="service-card__image"
+              alt="ESXi 1"
+            />
+          </span>
+          <span class="service-card__label">ESXi 1</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.1.12/ui/#/login">
+          <span class="service-card__icon">
+            <img
+              src="assets/images/kisspng-vmware-esxi-vmware-vsphere-vmdk-virtual-machine-telegram-5aba0e364c73b1.8059877815221427743132.png"
+              class="service-card__image"
+              alt="ESXi 2"
+            />
+          </span>
+          <span class="service-card__label">ESXi 2</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://zabbix.home.local">
+          <span class="service-card__icon">
+            <img src="assets/images/Zabbix_logo.svg" class="service-card__image" alt="Zabbix" />
+          </span>
+          <span class="service-card__label">Zabbix</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://omada.home.local/">
+          <span class="service-card__icon">
+            <img src="assets/images/omada-icon-2048x2048-a5bziim5.png" class="service-card__image" alt="Omada" />
+          </span>
+          <span class="service-card__label">Omada</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://proxy.home.local/login">
+          <span class="service-card__icon">
+            <img src="assets/images/nginxproxy.svg" class="service-card__image" alt="Nginx Proxy Manager" />
+          </span>
+          <span class="service-card__label">Nginx Proxy Manager</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button
+          class="service-card"
+          type="button"
+          data-url="http://188.253.16.197:54567/ajshfpiuaherpouighaeirg56aerh856srth486serth846aer/gkujhawefiuhaerg87234y5huhqf98q30hrg0q8h359g8hq9358hg9q8h34gp9q3p948htgq384g/xui/"
+        >
+          <span class="service-card__icon">
+            <img src="assets/images/xray.png" class="service-card__image" alt="XUI" />
+          </span>
+          <span class="service-card__label">XUI</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://100.100.10.119:8083/">
+          <span class="service-card__icon">
+            <img src="assets/images/hestia2x.png" class="service-card__image" alt="Hestia CP" />
+          </span>
+          <span class="service-card__label">Hestia CP</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://webmail.tspco.ru/">
+          <span class="service-card__icon">
+            <img src="assets/images/email.png" class="service-card__image" alt="Webmail" />
+          </span>
+          <span class="service-card__label">Webmail</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://sd.tspco.ru/">
+          <span class="service-card__icon">
+            <img src="assets/images/hesk.png" class="service-card__image" alt="Service Desk" />
+          </span>
+          <span class="service-card__label">Service Desk</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://10.20.0.2:8123/">
+          <span class="service-card__icon">
+            <img src="assets/images/homeasist.jpg" class="service-card__image" alt="Home Assistant" />
+          </span>
+          <span class="service-card__label">Home Assistant</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://hop.theskoch.ru/">
+          <span class="service-card__icon">
+            <img src="assets/images/nextcloud.png" class="service-card__image" alt="Nextcloud" />
+          </span>
+          <span class="service-card__label">Nextcloud</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://192.168.69.2/">
+          <span class="service-card__icon">
+            <img src="assets/images/openwrt.png" class="service-card__image" alt="OpenWrt" />
+          </span>
+          <span class="service-card__label">OpenWrt</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://wiki.theskoch.ru/">
+          <span class="service-card__icon">
+            <img src="assets/images/wiki.png" class="service-card__image" alt="Wiki" />
+          </span>
+          <span class="service-card__label">Wiki</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://service.theskoch.ru/">
+          <span class="service-card__icon">
+            <img src="assets/images/tool.png" class="service-card__image" alt="IT Tools" />
+          </span>
+          <span class="service-card__label">IT Tools</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://vault.theskoch.ru/">
+          <span class="service-card__icon">
+            <img src="assets/images/Vaultwarden.png" class="service-card__image" alt="Vaultwarden" />
+          </span>
+          <span class="service-card__label">Vaultwarden</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.10.101:9090/query">
+          <span class="service-card__icon">
+            <img src="assets/images/Prometheus_software_logo.svg" class="service-card__image" alt="Prometheus" />
+          </span>
+          <span class="service-card__label">Prometheus</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.10.101:3000/login">
+          <span class="service-card__icon">
+            <img src="assets/images/grafana.svg" class="service-card__image" alt="Grafana" />
+          </span>
+          <span class="service-card__label">Grafana</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.10.112:5678/">
+          <span class="service-card__icon">
+            <img src="assets/images/n8n-color.svg" class="service-card__image" alt="n8n" />
+          </span>
+          <span class="service-card__label">n8n</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.10.112:8282/">
+          <span class="service-card__icon">
+            <img src="assets/images/admiral.png" class="service-card__image" alt="Admiral" />
+          </span>
+          <span class="service-card__label">Admiral</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://100.100.10.113:8080/">
+          <span class="service-card__icon">
+            <img src="assets/images/trilium.svg" class="service-card__image" alt="Trilium Notes" />
+          </span>
+          <span class="service-card__label">Trilium Notes</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="https://termix.home.local/">
+          <span class="service-card__icon">
+            <img src="assets/images/termix.png" class="service-card__image" alt="Termix" />
+          </span>
+          <span class="service-card__label">Termix</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" type="button" data-url="http://speedtest.home.local/">
+          <span class="service-card__icon">
+            <img src="assets/images/OST.png" class="service-card__image" alt="OpenSpeedTest" />
+          </span>
+          <span class="service-card__label">OpenSpeedTest</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+
+        <button class="service-card" id="open-kuma-modal" type="button" data-url="" data-modal="true">
+          <span class="service-card__icon">
+            <img src="assets/images/Uptime-Kuma-Logo.png" class="service-card__image" alt="Uptime Kuma" />
+          </span>
+          <span class="service-card__label">Uptime Kuma</span>
+          <span class="service-card__remove" aria-hidden="true">✕</span>
+        </button>
+      </section>
+    </main>
+
+    <!-- Модальное окно со статусом Uptime Kuma -->
+    <div class="modal-backdrop" id="kuma-modal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Uptime Kuma">
+        <button class="modal__close" id="close-kuma-modal" type="button" aria-label="Закрыть">
+          &times;
+        </button>
+        <iframe class="modal__frame" src="http://188.253.16.197:3001/status/theskochstat" title="Uptime Kuma статус"></iframe>
+      </div>
+    </div>
+
+    <!-- Окно добавления нового сервиса -->
+    <div class="modal-backdrop" id="add-service-modal" aria-hidden="true">
+      <div class="modal modal--compact" role="dialog" aria-modal="true" aria-label="Добавление сервиса">
+        <button class="modal__close" id="close-add-service" type="button" aria-label="Закрыть">
+          &times;
+        </button>
+        <form class="service-form" id="service-form">
+          <h2 class="service-form__title">Добавить новый сервис</h2>
+          <label class="service-form__field">
+            <span class="service-form__label">Название</span>
+            <input class="service-form__input" type="text" name="title" required />
+          </label>
+          <label class="service-form__field">
+            <span class="service-form__label">Ссылка</span>
+            <input class="service-form__input" type="url" name="url" placeholder="https://" required />
+          </label>
+          <div class="service-form__field">
+            <span class="service-form__label">Иконка (перетащите файл или выберите)</span>
+            <div class="upload-dropzone" id="upload-dropzone">
+              <span class="upload-dropzone__text">Перетащите файл сюда</span>
+              <span class="upload-dropzone__hint">или нажмите для выбора</span>
+              <input class="upload-dropzone__input" type="file" id="icon-file" accept="image/*" />
+            </div>
+            <input type="hidden" id="icon-url" name="icon" />
+            <div class="upload-preview" id="upload-preview" aria-live="polite"></div>
+          </div>
+          <button class="service-form__submit" type="submit">Добавить</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Окно смены фонового изображения -->
+    <div class="modal-backdrop" id="background-modal" aria-hidden="true">
+      <div class="modal modal--compact" role="dialog" aria-modal="true" aria-label="Смена фонового изображения">
+        <button class="modal__close" id="close-background-modal" type="button" aria-label="Закрыть">
+          &times;
+        </button>
+        <form class="service-form" id="background-form">
+          <h2 class="service-form__title">Фоновое изображение</h2>
+          <div class="service-form__field">
+            <span class="service-form__label">Выберите изображение</span>
+            <div class="upload-dropzone" id="background-dropzone">
+              <span class="upload-dropzone__text">Перетащите файл сюда</span>
+              <span class="upload-dropzone__hint">или нажмите для выбора</span>
+              <input class="upload-dropzone__input" type="file" id="background-file" accept="image/*" />
+            </div>
+            <input type="hidden" id="background-url" />
+            <div class="upload-preview" id="background-preview" aria-live="polite"></div>
+          </div>
+          <button class="service-form__submit" type="submit">Сохранить фон</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Пасхалка: светлая тема -->
+    <button id="light-theme-btn" class="light-theme-btn" type="button">☀️ Светлая тема</button>
+    <div class="light-overlay" id="light-overlay" aria-hidden="true">
+      <div class="light-overlay__text" id="light-overlay-text">Приятного дня!</div>
+    </div>
+
+    <script>
+      // Открытие и закрытие модального окна Uptime Kuma
+      const kumaModal = document.getElementById('kuma-modal');
+      const openKumaModal = document.getElementById('open-kuma-modal');
+      const closeKumaModal = document.getElementById('close-kuma-modal');
+
+      const openKumaStatus = () => {
+        kumaModal.classList.add('is-active');
+        kumaModal.setAttribute('aria-hidden', 'false');
+      };
+
+      const closeKumaStatus = () => {
+        kumaModal.classList.remove('is-active');
+        kumaModal.setAttribute('aria-hidden', 'true');
+      };
+
+      closeKumaModal.addEventListener('click', closeKumaStatus);
+
+      kumaModal.addEventListener('click', event => {
+        if (event.target === kumaModal) {
+          closeKumaStatus();
+        }
+      });
+
+      // Пасхалка: отображение светлой темы
+      const lightThemeButton = document.getElementById('light-theme-btn');
+      const lightOverlay = document.getElementById('light-overlay');
+      const lightOverlayText = document.getElementById('light-overlay-text');
+
+      lightThemeButton.addEventListener('click', () => {
+        lightThemeButton.style.display = 'none';
+        lightOverlay.classList.add('is-active');
+        lightOverlay.setAttribute('aria-hidden', 'false');
+        setTimeout(() => lightOverlayText.classList.add('is-visible'), 3500);
+      });
+
+      // Управление добавлением и удалением карточек
+      const addServiceButton = document.getElementById('open-add-service');
+      const addServiceModal = document.getElementById('add-service-modal');
+      const closeAddService = document.getElementById('close-add-service');
+      const backgroundButton = document.getElementById('open-background-picker');
+      const backgroundModal = document.getElementById('background-modal');
+      const closeBackgroundModal = document.getElementById('close-background-modal');
+      const backgroundForm = document.getElementById('background-form');
+      const backgroundDropzone = document.getElementById('background-dropzone');
+      const backgroundFileInput = document.getElementById('background-file');
+      const backgroundPreview = document.getElementById('background-preview');
+      const backgroundUrlInput = document.getElementById('background-url');
+      const serviceForm = document.getElementById('service-form');
+      const servicesGrid = document.getElementById('services-grid');
+      const removeModeButton = document.getElementById('toggle-remove-mode');
+      const dropzone = document.getElementById('upload-dropzone');
+      const iconFileInput = document.getElementById('icon-file');
+      const iconUrlInput = document.getElementById('icon-url');
+      const uploadPreview = document.getElementById('upload-preview');
+      const settingsApiUrl = '/api/settings';
+      const servicesApiUrl = '/api/services';
+      const uploadApiUrl = '/api/upload';
+      let services = [];
+      const generateId = () => {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+        return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      };
+
+      const initialServices = Array.from(servicesGrid.querySelectorAll('.service-card')).map(card => ({
+        id: card.id || generateId(),
+        title: card.querySelector('.service-card__label')?.textContent?.trim() || 'Без названия',
+        url: card.dataset.url || '',
+        icon: card.querySelector('.service-card__image')?.getAttribute('src') || '',
+        isModal: card.id === 'open-kuma-modal'
+      }));
+      servicesGrid.innerHTML = '';
+      let isRemovalMode = false;
+
+      const openModal = modal => {
+        modal.classList.add('is-active');
+        modal.setAttribute('aria-hidden', 'false');
+      };
+
+      const closeModal = modal => {
+        modal.classList.remove('is-active');
+        modal.setAttribute('aria-hidden', 'true');
+      };
+
+      addServiceButton.addEventListener('click', () => openModal(addServiceModal));
+      closeAddService.addEventListener('click', () => closeModal(addServiceModal));
+
+      backgroundButton.addEventListener('click', () => openModal(backgroundModal));
+      closeBackgroundModal.addEventListener('click', () => closeModal(backgroundModal));
+
+      addServiceModal.addEventListener('click', event => {
+        if (event.target === addServiceModal) {
+          closeModal(addServiceModal);
+        }
+      });
+
+      backgroundModal.addEventListener('click', event => {
+        if (event.target === backgroundModal) {
+          closeModal(backgroundModal);
+        }
+      });
+
+      removeModeButton.addEventListener('click', () => {
+        isRemovalMode = !isRemovalMode;
+        servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
+        removeModeButton.classList.toggle('is-active', isRemovalMode);
+      });
+
+      const normalizeService = service => ({
+        id: service.id || generateId(),
+        title: service.title || 'Без названия',
+        url: service.url || '',
+        icon: service.icon || '',
+        isModal: service.isModal ?? false
+      });
+
+      const renderServices = () => {
+        servicesGrid.innerHTML = '';
+        services.forEach(service => {
+          const card = createServiceCard(service);
+          servicesGrid.appendChild(card);
+        });
+      };
+
+      const createServiceCard = service => {
+        const card = document.createElement('button');
+        card.className = 'service-card';
+        card.type = 'button';
+        card.dataset.url = service.url;
+        if (service.id) {
+          card.id = service.id;
+        }
+        if (service.isModal) {
+          card.dataset.modal = 'true';
+        }
+
+        const iconWrapper = document.createElement('span');
+        iconWrapper.className = 'service-card__icon';
+
+        const image = document.createElement('img');
+        image.className = 'service-card__image';
+        image.alt = service.title;
+        image.src = service.icon || 'assets/images/tool.png';
+        iconWrapper.appendChild(image);
+
+        const label = document.createElement('span');
+        label.className = 'service-card__label';
+        label.textContent = service.title;
+
+        const remove = document.createElement('span');
+        remove.className = 'service-card__remove';
+        remove.setAttribute('aria-hidden', 'true');
+        remove.textContent = '✕';
+
+        card.appendChild(iconWrapper);
+        card.appendChild(label);
+        card.appendChild(remove);
+
+        return card;
+      };
+
+      const applyBackground = url => {
+        if (!url) {
+          document.body.style.backgroundImage = '';
+          return;
+        }
+        document.body.style.backgroundImage = `url("${url}")`;
+      };
+
+      const fetchSettings = async () => {
+        try {
+          const response = await fetch(settingsApiUrl, { cache: 'no-store' });
+          if (!response.ok) {
+            return;
+          }
+          const data = await response.json();
+          applyBackground(data.backgroundUrl || '');
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      const saveSettings = async payload => {
+        await fetch(settingsApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+      };
+
+      const fetchServices = async () => {
+        try {
+          const response = await fetch(servicesApiUrl, { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error('Ошибка загрузки');
+          }
+          const data = await response.json();
+          if (!data || typeof data !== 'object') {
+            services = [];
+          } else if (data.initialized) {
+            services = Array.isArray(data.items) ? data.items.map(normalizeService) : [];
+          } else if (initialServices.length > 0) {
+            services = initialServices.map(normalizeService);
+            await saveServices();
+          } else {
+            services = [];
+          }
+          renderServices();
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      const saveServices = async () => {
+        await fetch(servicesApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(services)
+        });
+      };
+
+      const uploadFile = async file => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(uploadApiUrl, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Не удалось загрузить файл');
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.message || 'Не удалось загрузить файл');
+        }
+
+        return data.url;
+      };
+
+      const setPreview = (url, name) => {
+        if (!url) {
+          uploadPreview.textContent = '';
+          return;
+        }
+
+        uploadPreview.innerHTML = `
+          <div class="upload-preview__item">
+            <img src="${url}" alt="${name}" class="upload-preview__image" />
+            <span class="upload-preview__name">${name}</span>
+          </div>
+        `;
+      };
+
+      const handleFileSelect = async file => {
+        if (!file) {
+          return;
+        }
+        try {
+          dropzone.classList.add('is-loading');
+          const url = await uploadFile(file);
+          iconUrlInput.value = url;
+          setPreview(url, file.name);
+        } catch (error) {
+          alert(error.message);
+        } finally {
+          dropzone.classList.remove('is-loading');
+        }
+      };
+
+      const handleBackgroundSelect = async file => {
+        if (!file) {
+          return;
+        }
+        try {
+          backgroundDropzone.classList.add('is-loading');
+          const url = await uploadFile(file);
+          backgroundUrlInput.value = url;
+          backgroundPreview.innerHTML = `
+            <div class="upload-preview__item">
+              <img src="${url}" alt="${file.name}" class="upload-preview__image" />
+              <span class="upload-preview__name">${file.name}</span>
+            </div>
+          `;
+        } catch (error) {
+          alert(error.message);
+        } finally {
+          backgroundDropzone.classList.remove('is-loading');
+        }
+      };
+
+      iconFileInput.addEventListener('change', event => handleFileSelect(event.target.files[0]));
+
+      dropzone.addEventListener('dragover', event => {
+        event.preventDefault();
+        dropzone.classList.add('is-dragover');
+      });
+
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('is-dragover'));
+
+      dropzone.addEventListener('drop', event => {
+        event.preventDefault();
+        dropzone.classList.remove('is-dragover');
+        handleFileSelect(event.dataTransfer.files[0]);
+      });
+
+      backgroundFileInput.addEventListener('change', event => handleBackgroundSelect(event.target.files[0]));
+
+      backgroundDropzone.addEventListener('dragover', event => {
+        event.preventDefault();
+        backgroundDropzone.classList.add('is-dragover');
+      });
+
+      backgroundDropzone.addEventListener('dragleave', () => backgroundDropzone.classList.remove('is-dragover'));
+
+      backgroundDropzone.addEventListener('drop', event => {
+        event.preventDefault();
+        backgroundDropzone.classList.remove('is-dragover');
+        handleBackgroundSelect(event.dataTransfer.files[0]);
+      });
+
+      backgroundForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const url = backgroundUrlInput.value.trim();
+        applyBackground(url);
+        await saveSettings({ backgroundUrl: url });
+        closeModal(backgroundModal);
+      });
+
+      serviceForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const formData = new FormData(serviceForm);
+        const title = formData.get('title')?.toString().trim();
+        const url = formData.get('url')?.toString().trim();
+        const icon = formData.get('icon')?.toString().trim();
+
+        if (!title || !url) {
+          return;
+        }
+
+        services.push({
+          id: generateId(),
+          title,
+          url,
+          icon,
+          isModal: false
+        });
+
+        await saveServices();
+        renderServices();
+
+        serviceForm.reset();
+        iconUrlInput.value = '';
+        setPreview('', '');
+        closeModal(addServiceModal);
+      });
+
+      servicesGrid.addEventListener('click', async event => {
+        const card = event.target.closest('.service-card');
+        if (!card) {
+          return;
+        }
+
+        if (isRemovalMode && event.target.closest('.service-card__remove')) {
+          event.stopPropagation();
+          const id = card.id;
+          services = services.filter(service => service.id !== id);
+          await saveServices();
+          renderServices();
+          return;
+        }
+
+        if (isRemovalMode) {
+          return;
+        }
+
+        if (card.dataset.modal === 'true') {
+          openKumaStatus();
+          return;
+        }
+
+        const url = card.dataset.url;
+        if (url) {
+          window.open(url);
+        }
+      });
+
+      fetchServices();
+      fetchSettings();
+    </script>
+  </body>
+</html>

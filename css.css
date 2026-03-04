@@ -1,0 +1,364 @@
+@font-face {
+  font-family: "Nexa Light";
+  src: url("assets/fonts/nexalight.ttf");
+}
+
+/* Базовое оформление страницы */
+body {
+  background-color: #4a4a4a;
+  background-blend-mode: overlay;
+  background-image: url("assets/images/rofel2.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: "Nexa Light", "Segoe UI", sans-serif;
+}
+
+/* Контейнер страницы */
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Заголовок */
+.page-title {
+  margin: 0 0 40px;
+  padding: 6px 48px;
+  background: #1a1a1a;
+  border-radius: 100px;
+  color: #ffffff;
+  font-size: 40px;
+  font-weight: 300;
+}
+
+/* Панель быстрых действий */
+.page-actions {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 1100;
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.icon-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.icon-button.is-active {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Сетка карточек сервисов */
+.services-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin: 0 auto;
+}
+
+/* Карточка сервиса */
+.service-card {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  padding: 0;
+  background: transparent;
+  position: relative;
+}
+
+.service-card:hover {
+  transform: scale(0.96);
+}
+
+.service-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 130px;
+  background: #1a1a1a;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+}
+
+.service-card__image {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+
+.service-card__label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 35px;
+  color: #bfbfbf;
+  background: #353535;
+  text-align: center;
+  border-radius: 0 0 10px 10px;
+  font-size: 14px;
+}
+
+.service-card__remove {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #d94b4b;
+  color: #ffffff;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.services-grid.is-removal-mode .service-card {
+  position: relative;
+}
+
+.services-grid.is-removal-mode .service-card__remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.services-grid.is-removal-mode .service-card:hover {
+  transform: scale(0.98);
+}
+
+/* Модальное окно Uptime Kuma */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.7);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop.is-active {
+  display: flex;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 18px;
+  width: 90vw;
+  height: 85vh;
+  max-width: 1000px;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal__close {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  font-size: 2rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #222222;
+}
+
+.modal__frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.modal--compact {
+  max-width: 520px;
+  height: auto;
+  padding: 32px 32px 28px;
+}
+
+/* Форма добавления сервиса */
+.service-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: #1a1a1a;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.service-form__title {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.service-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-form__label {
+  font-size: 14px;
+  color: #3a3a3a;
+}
+
+.service-form__input {
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.service-form__submit {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Зона загрузки иконки */
+.upload-dropzone {
+  border: 2px dashed #c8c8c8;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  background: #f6f6f6;
+  color: #555555;
+  position: relative;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.upload-dropzone__text {
+  display: block;
+  font-weight: 600;
+}
+
+.upload-dropzone__hint {
+  display: block;
+  font-size: 12px;
+  margin-top: 4px;
+  color: #777777;
+}
+
+.upload-dropzone__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-dropzone.is-dragover {
+  border-color: #1a1a1a;
+  background: #e8e8e8;
+}
+
+.upload-dropzone.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.upload-preview {
+  margin-top: 12px;
+}
+
+.upload-preview__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f2f2f2;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.upload-preview__image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
+}
+
+.upload-preview__name {
+  font-size: 13px;
+  color: #444444;
+}
+
+/* Пасхалка: светлая тема */
+.light-theme-btn {
+  position: fixed;
+  top: 65px;
+  right: 15px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.light-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 3s ease;
+  z-index: 9999;
+}
+
+.light-overlay.is-active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.light-overlay__text {
+  opacity: 0;
+  font-size: 120px;
+  font-weight: bold;
+  color: #000000;
+  transition: 1s;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.light-overlay__text.is-visible {
+  opacity: 1;
+}
