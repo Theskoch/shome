@@ -2,33 +2,33 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <title>Панель домашних сервисов</title>
+    <title>Home Services Dashboard</title>
     <link rel="stylesheet" href="css.css" />
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   </head>
   <body>
     <main class="page">
-      <!-- Заголовок страницы -->
-      <h1 class="page-title">Home services</h1>
+      <!-- Page title -->
+      <h1 class="page-title">Home Services</h1>
 
-      <!-- Кнопки управления карточками -->
-      <div class="page-actions" aria-label="Действия со списком">
-        <button class="icon-button" id="open-add-service" type="button" aria-label="Добавить сервис">
+      <!-- Action buttons -->
+      <div class="page-actions" aria-label="Quick actions">
+        <button class="icon-button" id="open-add-service" type="button" aria-label="Add service">
           ➕
         </button>
-        <button class="icon-button" id="toggle-edit-mode" type="button" aria-label="Редактировать сервисы">
+        <button class="icon-button" id="toggle-edit-mode" type="button" aria-label="Edit services">
           ✏️
         </button>
-        <button class="icon-button" id="toggle-remove-mode" type="button" aria-label="Удалить сервисы">
+        <button class="icon-button" id="toggle-remove-mode" type="button" aria-label="Remove services">
           🗑️
         </button>
-        <button class="icon-button" id="open-background-picker" type="button" aria-label="Сменить фон">
+        <button class="icon-button" id="open-background-picker" type="button" aria-label="Change background">
           🖼️
         </button>
       </div>
 
-      <!-- Сетка карточек с сервисами -->
-      <section class="services-grid" id="services-grid" aria-label="Список сервисов">
+      <!-- Services grid -->
+      <section class="services-grid" id="services-grid" aria-label="Services list">
         <button class="service-card" type="button" data-url="https://vcenter.home.local">
           <span class="service-card__icon">
             <img src="assets/images/ESXi.svg" class="service-card__image" alt="vCenter" />
@@ -235,79 +235,79 @@
       </section>
     </main>
 
-    <!-- Модальное окно со статусом Uptime Kuma -->
+    <!-- Uptime Kuma modal -->
     <div class="modal-backdrop" id="kuma-modal" aria-hidden="true">
       <div class="modal" role="dialog" aria-modal="true" aria-label="Uptime Kuma">
-        <button class="modal__close" id="close-kuma-modal" type="button" aria-label="Закрыть">
+        <button class="modal__close" id="close-kuma-modal" type="button" aria-label="Close">
           &times;
         </button>
-        <iframe class="modal__frame" src="http://188.253.16.197:3001/status/theskochstat" title="Uptime Kuma статус"></iframe>
+        <iframe class="modal__frame" src="http://188.253.16.197:3001/status/theskochstat" title="Uptime Kuma status"></iframe>
       </div>
     </div>
 
-    <!-- Окно добавления нового сервиса -->
+    <!-- Add service modal -->
     <div class="modal-backdrop" id="add-service-modal" aria-hidden="true">
-      <div class="modal modal--compact" role="dialog" aria-modal="true" aria-label="Добавление сервиса">
-        <button class="modal__close" id="close-add-service" type="button" aria-label="Закрыть">
+      <div class="modal modal--compact" role="dialog" aria-modal="true" aria-label="Add service">
+        <button class="modal__close" id="close-add-service" type="button" aria-label="Close">
           &times;
         </button>
         <form class="service-form" id="service-form">
-          <h2 class="service-form__title" id="service-form-title">Добавить новый сервис</h2>
+          <h2 class="service-form__title" id="service-form-title">Add new service</h2>
           <label class="service-form__field">
-            <span class="service-form__label">Название</span>
+            <span class="service-form__label">Name</span>
             <input class="service-form__input" type="text" name="title" required />
           </label>
           <label class="service-form__field">
-            <span class="service-form__label">Ссылка</span>
+            <span class="service-form__label">Link</span>
             <input class="service-form__input" type="url" name="url" placeholder="https://" required />
           </label>
           <div class="service-form__field">
-            <span class="service-form__label">Иконка (перетащите файл или выберите)</span>
+            <span class="service-form__label">Icon (drag & drop or click)</span>
             <div class="upload-dropzone" id="upload-dropzone">
-              <span class="upload-dropzone__text">Перетащите файл сюда</span>
-              <span class="upload-dropzone__hint">или нажмите для выбора</span>
+              <span class="upload-dropzone__text">Drop file here</span>
+              <span class="upload-dropzone__hint">or click to select</span>
               <input class="upload-dropzone__input" type="file" id="icon-file" accept="image/*" />
             </div>
             <input type="hidden" id="icon-url" name="icon" />
             <input type="hidden" id="service-id" name="serviceId" />
             <div class="upload-preview" id="upload-preview" aria-live="polite"></div>
           </div>
-          <button class="service-form__submit" id="service-form-submit" type="submit">Добавить</button>
+          <button class="service-form__submit" id="service-form-submit" type="submit">Add</button>
         </form>
       </div>
     </div>
 
-    <!-- Окно смены фонового изображения -->
+    <!-- Background image modal -->
     <div class="modal-backdrop" id="background-modal" aria-hidden="true">
-      <div class="modal modal--compact" role="dialog" aria-modal="true" aria-label="Смена фонового изображения">
-        <button class="modal__close" id="close-background-modal" type="button" aria-label="Закрыть">
+      <div class="modal modal--compact" role="dialog" aria-modal="true" aria-label="Background image">
+        <button class="modal__close" id="close-background-modal" type="button" aria-label="Close">
           &times;
         </button>
         <form class="service-form" id="background-form">
-          <h2 class="service-form__title">Фоновое изображение</h2>
+          <h2 class="service-form__title">Background image</h2>
           <div class="service-form__field">
-            <span class="service-form__label">Выберите изображение</span>
+            <span class="service-form__label">Select image</span>
             <div class="upload-dropzone" id="background-dropzone">
-              <span class="upload-dropzone__text">Перетащите файл сюда</span>
-              <span class="upload-dropzone__hint">или нажмите для выбора</span>
+              <span class="upload-dropzone__text">Drop file here</span>
+              <span class="upload-dropzone__hint">or click to select</span>
               <input class="upload-dropzone__input" type="file" id="background-file" accept="image/*" />
             </div>
             <input type="hidden" id="background-url" />
             <div class="upload-preview" id="background-preview" aria-live="polite"></div>
           </div>
-          <button class="service-form__submit" type="submit">Сохранить фон</button>
+          <button class="service-form__submit" type="submit">Save background</button>
         </form>
       </div>
     </div>
 
-    <!-- Пасхалка: светлая тема -->
-    <button id="light-theme-btn" class="light-theme-btn" type="button">☀️ Светлая тема</button>
+    <!-- Easter egg: light theme -->
+    <button id="light-theme-btn" class="light-theme-btn" type="button">☀️ Light theme</button>
     <div class="light-overlay" id="light-overlay" aria-hidden="true">
-      <div class="light-overlay__text" id="light-overlay-text">Приятного дня!</div>
+      <div class="light-overlay__text" id="light-overlay-text">Have a great day!</div>
     </div>
 
     <script>
-      // Открытие и закрытие модального окна Uptime Kuma
+      // Uptime Kuma modal
       const kumaModal = document.getElementById('kuma-modal');
       const openKumaModal = document.getElementById('open-kuma-modal');
       const closeKumaModal = document.getElementById('close-kuma-modal');
@@ -330,7 +330,7 @@
         }
       });
 
-      // Пасхалка: отображение светлой темы
+      // Easter egg: light theme
       const lightThemeButton = document.getElementById('light-theme-btn');
       const lightOverlay = document.getElementById('light-overlay');
       const lightOverlayText = document.getElementById('light-overlay-text');
@@ -342,7 +342,7 @@
         setTimeout(() => lightOverlayText.classList.add('is-visible'), 3500);
       });
 
-      // Управление добавлением и удалением карточек
+      // Add/edit/remove services
       const addServiceButton = document.getElementById('open-add-service');
       const editModeButton = document.getElementById('toggle-edit-mode');
       const addServiceModal = document.getElementById('add-service-modal');
@@ -383,7 +383,7 @@
         const image = card.querySelector('.service-card__image');
         return {
           id: card.id || generateId(),
-          title: label ? (label.textContent || '').trim() : 'Без названия',
+          title: label ? (label.textContent || '').trim() : 'Untitled',
           url: card.dataset.url || '',
           icon: image ? image.getAttribute('src') || '' : '',
           isModal: card.id === 'open-kuma-modal'
@@ -412,8 +412,8 @@
         editingServiceId = '';
         editingServiceIcon = '';
         setPreview('', '');
-        serviceFormTitle.textContent = 'Добавить новый сервис';
-        serviceFormSubmit.textContent = 'Добавить';
+        serviceFormTitle.textContent = 'Add new service';
+        serviceFormSubmit.textContent = 'Add';
       };
 
       const openAddServiceForm = () => {
@@ -432,8 +432,8 @@
           iconUrlInput.value = service.icon;
           setPreview(resolveIconUrl(service.icon), service.title);
         }
-        serviceFormTitle.textContent = 'Редактировать сервис';
-        serviceFormSubmit.textContent = 'Сохранить';
+        serviceFormTitle.textContent = 'Edit service';
+        serviceFormSubmit.textContent = 'Save';
         openModal(addServiceModal);
       };
 
@@ -486,7 +486,7 @@
 
       const normalizeService = service => ({
         id: service.id || generateId(),
-        title: service.title || 'Без названия',
+        title: service.title || 'Untitled',
         url: service.url || '',
         icon: service.icon || '',
         isModal: service.isModal ?? false
@@ -540,7 +540,7 @@
 
         const editBadge = document.createElement('span');
         editBadge.className = 'service-card__edit';
-        editBadge.setAttribute('aria-label', 'Редактировать');
+        editBadge.setAttribute('aria-label', 'Edit');
         editBadge.setAttribute('role', 'button');
         editBadge.setAttribute('tabindex', '0');
         editBadge.textContent = '✏️';
@@ -593,7 +593,7 @@
         try {
           const response = await fetch(servicesApiUrl, { cache: 'no-store' });
           if (!response.ok) {
-            throw new Error('Ошибка загрузки');
+            throw new Error('Failed to load services');
           }
           const data = await response.json();
           if (!data || typeof data !== 'object') {
@@ -638,12 +638,12 @@
         });
 
         if (!response.ok) {
-          throw new Error('Не удалось загрузить файл');
+          throw new Error('Failed to upload file');
         }
 
         const data = await response.json();
         if (!data.success) {
-          throw new Error(data.message || 'Не удалось загрузить файл');
+          throw new Error(data.message || 'Failed to upload file');
         }
 
         return data.url;

@@ -47,11 +47,11 @@ configure_session(load_ldap_config())
 
 def authenticate_ldap(username: str, password: str, config: dict) -> tuple[bool, str]:
     if not config:
-        return False, "LDAP конфигурация не найдена"
+        return False, "LDAP configuration not found"
 
     server_uri = config.get("server_uri")
     if not server_uri:
-        return False, "server_uri не указан"
+        return False, "server_uri is missing"
 
     server = Server(server_uri, use_ssl=bool(config.get("use_ssl", False)))
     user_dn_template = config.get("user_dn_template")
@@ -68,16 +68,27 @@ def authenticate_ldap(username: str, password: str, config: dict) -> tuple[bool,
     bind_password = config.get("bind_password")
     search_base = config.get("search_base")
     search_filter = config.get("search_filter", "(|(sAMAccountName={username})(uid={username}))")
+    required_group = config.get("required_group_dn")
     if not all([bind_dn, bind_password, search_base]):
-        return False, "Недостаточно данных для поиска пользователя"
+        return False, "Missing LDAP search configuration"
 
     try:
         service_conn = Connection(server, user=bind_dn, password=bind_password, auto_bind=True)
-        service_conn.search(search_base, search_filter.format(username=username), attributes=["distinguishedName"])
+        service_conn.search(
+            search_base,
+            search_filter.format(username=username),
+            attributes=["distinguishedName", "memberOf"],
+        )
         if not service_conn.entries:
             service_conn.unbind()
-            return False, "Пользователь не найден"
-        user_dn = service_conn.entries[0].entry_dn
+            return False, "User not found"
+        entry = service_conn.entries[0]
+        user_dn = entry.entry_dn
+        if required_group:
+            member_of = entry.memberOf.values if hasattr(entry, "memberOf") else []
+            if required_group not in member_of:
+                service_conn.unbind()
+                return False, "Access denied"
         service_conn.unbind()
         user_conn = Connection(server, user=user_dn, password=password, auto_bind=True)
         user_conn.unbind()
@@ -90,7 +101,7 @@ def require_auth(handler):
     @wraps(handler)
     def wrapper(*args, **kwargs):
         if not session.get("user"):
-            return jsonify({"success": False, "message": "Требуется вход"}), 401
+            return jsonify({"success": False, "message": "Authentication required"}), 401
         return handler(*args, **kwargs)
 
     return wrapper
@@ -159,9 +170,9 @@ def is_allowed(filename: str) -> bool:
 
 def redirect_to_login():
     return (
-        "<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\" />"
+        "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\" />"
         "<meta http-equiv=\"refresh\" content=\"0; url=/login\" /></head>"
-        "<body><a href=\"/login\">Перейти к входу</a></body></html>",
+        "<body><a href=\"/login\">Go to sign in</a></body></html>",
         302,
     )
 
@@ -184,9 +195,9 @@ def app_page():
 def login_page():
     if session.get("user"):
         return (
-            "<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\" />"
+            "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\" />"
             "<meta http-equiv=\"refresh\" content=\"0; url=/app\" /></head>"
-            "<body><a href=\"/app\">Перейти</a></body></html>",
+            "<body><a href=\"/app\">Go to dashboard</a></body></html>",
             302,
         )
     return send_from_directory(BASE_DIR, "login.htm")
@@ -201,17 +212,17 @@ def auth_status():
 def auth_login():
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
-        return jsonify({"success": False, "message": "Неверный формат данных"}), 400
+        return jsonify({"success": False, "message": "Invalid payload"}), 400
 
     username = str(data.get("username", "")).strip()
     password = str(data.get("password", "")).strip()
     if not username or not password:
-        return jsonify({"success": False, "message": "Введите логин и пароль"}), 400
+        return jsonify({"success": False, "message": "Enter username and password"}), 400
 
     config = load_ldap_config()
     ok, error = authenticate_ldap(username, password, config)
     if not ok:
-        return jsonify({"success": False, "message": error or "Ошибка авторизации"}), 401
+        return jsonify({"success": False, "message": error or "Authentication failed"}), 401
 
     session["user"] = username
     session.permanent = True
@@ -234,7 +245,7 @@ def services():
         return jsonify({"initialized": True, "items": items})
     data = request.get_json(silent=True)
     if not isinstance(data, list):
-        return jsonify({"success": False, "message": "Неверный формат данных"}), 400
+        return jsonify({"success": False, "message": "Invalid payload"}), 400
 
     normalized = []
     for service in data:
@@ -260,7 +271,7 @@ def settings():
 
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
-        return jsonify({"success": False, "message": "Неверный формат данных"}), 400
+        return jsonify({"success": False, "message": "Invalid payload"}), 400
 
     save_settings(data)
     return jsonify({"success": True})
@@ -270,14 +281,14 @@ def settings():
 @require_auth
 def upload():
     if "file" not in request.files:
-        return jsonify({"success": False, "message": "Файл не найден"}), 400
+        return jsonify({"success": False, "message": "File not found"}), 400
 
     file = request.files["file"]
     if file.filename == "":
-        return jsonify({"success": False, "message": "Файл не выбран"}), 400
+        return jsonify({"success": False, "message": "No file selected"}), 400
 
     if not is_allowed(file.filename):
-        return jsonify({"success": False, "message": "Недопустимый формат файла"}), 400
+        return jsonify({"success": False, "message": "Unsupported file type"}), 400
 
     ensure_storage()
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")

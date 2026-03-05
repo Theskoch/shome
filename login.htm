@@ -2,25 +2,25 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <title>Вход в панель</title>
+    <title>Sign in</title>
     <link rel="stylesheet" href="css.css" />
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   </head>
   <body class="login-page">
     <div class="auth-backdrop is-active" aria-hidden="false">
-      <div class="auth-card" role="dialog" aria-modal="true" aria-label="Авторизация">
-        <h2 class="auth-card__title">Вход</h2>
+      <div class="auth-card" role="dialog" aria-modal="true" aria-label="Sign in">
+        <h2 class="auth-card__title">Sign in</h2>
         <form class="auth-form" id="auth-form">
           <label class="auth-form__field">
-            <span class="auth-form__label">Логин</span>
+            <span class="auth-form__label">Username</span>
             <input class="auth-form__input" type="text" name="username" autocomplete="username" required />
           </label>
           <label class="auth-form__field">
-            <span class="auth-form__label">Пароль</span>
+            <span class="auth-form__label">Password</span>
             <input class="auth-form__input" type="password" name="password" autocomplete="current-password" required />
           </label>
           <div class="auth-form__error" id="auth-error" aria-live="polite"></div>
-          <button class="auth-form__submit" type="submit">Войти</button>
+          <button class="auth-form__submit" type="submit">Sign in</button>
         </form>
       </div>
     </div>
@@ -37,7 +37,7 @@
         const username = (formData.get('username') || '').toString().trim();
         const password = (formData.get('password') || '').toString();
         if (!username || !password) {
-          authError.textContent = 'Введите логин и пароль';
+          authError.textContent = 'Enter username and password';
           return;
         }
         try {
@@ -50,12 +50,12 @@
           });
           const data = await response.json();
           if (!response.ok || !data.success) {
-            authError.textContent = data.message || 'Ошибка авторизации';
+            authError.textContent = data.message || 'Authentication failed';
             return;
           }
           window.location.href = '/app';
         } catch (error) {
-          authError.textContent = 'Ошибка соединения';
+          authError.textContent = 'Connection error';
         }
       });
     </script>

@@ -31,11 +31,6 @@ body {
   display: none;
 }
 
-body:not(.is-authenticated) .page {
-  filter: blur(3px);
-  pointer-events: none;
-  user-select: none;
-}
 
 * {
   font-family: "Nexa Light", sans-serif;
