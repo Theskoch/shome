@@ -300,6 +300,25 @@
       </div>
     </div>
 
+    <!-- Окно авторизации -->
+    <div class="auth-backdrop" id="auth-modal" aria-hidden="true">
+      <div class="auth-card" role="dialog" aria-modal="true" aria-label="Авторизация">
+        <h2 class="auth-card__title">Вход</h2>
+        <form class="auth-form" id="auth-form">
+          <label class="auth-form__field">
+            <span class="auth-form__label">Логин</span>
+            <input class="auth-form__input" type="text" name="username" autocomplete="username" required />
+          </label>
+          <label class="auth-form__field">
+            <span class="auth-form__label">Пароль</span>
+            <input class="auth-form__input" type="password" name="password" autocomplete="current-password" required />
+          </label>
+          <div class="auth-form__error" id="auth-error" aria-live="polite"></div>
+          <button class="auth-form__submit" type="submit">Войти</button>
+        </form>
+      </div>
+    </div>
+
     <!-- Пасхалка: светлая тема -->
     <button id="light-theme-btn" class="light-theme-btn" type="button">☀️ Светлая тема</button>
     <div class="light-overlay" id="light-overlay" aria-hidden="true">
@@ -363,10 +382,16 @@
       const backgroundUrlInput = document.getElementById('background-url');
       const servicesGrid = document.getElementById('services-grid');
       const removeModeButton = document.getElementById('toggle-remove-mode');
+      const authModal = document.getElementById('auth-modal');
+      const authForm = document.getElementById('auth-form');
+      const authError = document.getElementById('auth-error');
       const dropzone = document.getElementById('upload-dropzone');
       const iconFileInput = document.getElementById('icon-file');
       const iconUrlInput = document.getElementById('icon-url');
       const uploadPreview = document.getElementById('upload-preview');
+      const authStatusUrl = '/api/auth/status';
+      const authLoginUrl = '/api/auth/login';
+      let isAuthenticated = false;
       const settingsApiUrl = '/api/settings';
       const servicesApiUrl = '/api/services';
       const uploadApiUrl = '/api/upload';
@@ -403,6 +428,21 @@
       const closeModal = modal => {
         modal.classList.remove('is-active');
         modal.setAttribute('aria-hidden', 'true');
+      };
+
+      const openAuthModal = () => {
+        authModal.classList.add('is-active');
+        authModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.remove('is-authenticated');
+        isAuthenticated = false;
+      };
+
+      const closeAuthModal = () => {
+        authModal.classList.remove('is-active');
+        authModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.add('is-authenticated');
+        isAuthenticated = true;
+        authError.textContent = '';
       };
 
       const resetServiceForm = () => {
@@ -499,6 +539,9 @@
         if (icon.startsWith('/') || icon.startsWith('http://') || icon.startsWith('https://')) {
           return icon;
         }
+        if (icon.startsWith('uploads/')) {
+          return `/${icon}`;
+        }
         return `assets/images/${icon}`;
       };
 
@@ -566,6 +609,10 @@
       const fetchSettings = async () => {
         try {
           const response = await fetch(settingsApiUrl, { cache: 'no-store' });
+          if (response.status === 401) {
+            openAuthModal();
+            return;
+          }
           if (!response.ok) {
             return;
           }
@@ -577,18 +624,26 @@
       };
 
       const saveSettings = async payload => {
-        await fetch(settingsApiUrl, {
+        const response = await fetch(settingsApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
         });
+        if (response.status === 401) {
+          openAuthModal();
+          throw new Error('Требуется вход');
+        }
       };
 
       const fetchServices = async () => {
         try {
           const response = await fetch(servicesApiUrl, { cache: 'no-store' });
+          if (response.status === 401) {
+            openAuthModal();
+            return;
+          }
           if (!response.ok) {
             throw new Error('Ошибка загрузки');
           }
@@ -616,13 +671,17 @@
       };
 
       const saveServices = async () => {
-        await fetch(servicesApiUrl, {
+        const response = await fetch(servicesApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(services)
         });
+        if (response.status === 401) {
+          openAuthModal();
+          throw new Error('Требуется вход');
+        }
       };
 
       const uploadFile = async file => {
@@ -633,6 +692,11 @@
           method: 'POST',
           body: formData
         });
+
+        if (response.status === 401) {
+          openAuthModal();
+          throw new Error('Требуется вход');
+        }
 
         if (!response.ok) {
           throw new Error('Не удалось загрузить файл');
@@ -729,6 +793,10 @@
 
       backgroundForm.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!isAuthenticated) {
+          openAuthModal();
+          return;
+        }
         const url = backgroundUrlInput.value.trim();
         applyBackground(url);
         await saveSettings({ backgroundUrl: url });
@@ -737,6 +805,10 @@
 
       serviceForm.addEventListener('submit', async event => {
         event.preventDefault();
+        if (!isAuthenticated) {
+          openAuthModal();
+          return;
+        }
         const formData = new FormData(serviceForm);
         const titleRaw = formData.get('title');
         const urlRaw = formData.get('url');
@@ -777,6 +849,10 @@
       });
 
       servicesGrid.addEventListener('click', async event => {
+        if (!isAuthenticated) {
+          openAuthModal();
+          return;
+        }
         const card = event.target.closest('.service-card');
         if (!card) {
           return;
@@ -815,8 +891,58 @@
         }
       });
 
-      fetchServices();
-      fetchSettings();
+      const checkAuth = async () => {
+        try {
+          const response = await fetch(authStatusUrl, { cache: 'no-store' });
+          if (!response.ok) {
+            openAuthModal();
+            return;
+          }
+          const data = await response.json();
+          if (data.authenticated) {
+            closeAuthModal();
+            await fetchServices();
+            await fetchSettings();
+          } else {
+            openAuthModal();
+          }
+        } catch (error) {
+          openAuthModal();
+        }
+      };
+
+      authForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        authError.textContent = '';
+        const formData = new FormData(authForm);
+        const username = (formData.get('username') || '').toString().trim();
+        const password = (formData.get('password') || '').toString();
+        if (!username || !password) {
+          authError.textContent = 'Введите логин и пароль';
+          return;
+        }
+        try {
+          const response = await fetch(authLoginUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await response.json();
+          if (!response.ok || !data.success) {
+            authError.textContent = data.message || 'Ошибка авторизации';
+            return;
+          }
+          closeAuthModal();
+          await fetchServices();
+          await fetchSettings();
+        } catch (error) {
+          authError.textContent = 'Ошибка соединения';
+        }
+      });
+
+      checkAuth();
     </script>
   </body>
 </html>

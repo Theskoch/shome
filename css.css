@@ -22,6 +22,12 @@ body {
   font-family: "Nexa Light", sans-serif;
 }
 
+body:not(.is-authenticated) .page {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
 * {
   font-family: "Nexa Light", sans-serif;
 }
@@ -363,6 +369,84 @@ body {
 .upload-preview__name {
   font-size: 13px;
   color: #dddddd;
+}
+
+/* Окно авторизации */
+.auth-backdrop {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 3000;
+  padding: 20px;
+}
+
+.auth-backdrop.is-active {
+  display: flex;
+}
+
+.auth-card {
+  width: min(420px, 95vw);
+  background: #1a1a1a;
+  border-radius: 18px;
+  padding: 32px;
+  color: #ffffff;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+.auth-card__title {
+  margin: 0 0 20px;
+  font-size: 26px;
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-form__label {
+  font-size: 14px;
+  color: #d6d6d6;
+}
+
+.auth-form__input {
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #2a2a2a;
+  color: #ffffff;
+}
+
+.auth-form__error {
+  min-height: 18px;
+  font-size: 13px;
+  color: #ff7b7b;
+  text-align: center;
+}
+
+.auth-form__submit {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #3fbf66;
+  color: #ffffff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.auth-form__submit:hover {
+  background: #36aa5a;
 }
 
 /* Пасхалка: светлая тема */
