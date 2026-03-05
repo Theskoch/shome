@@ -157,9 +157,39 @@ def is_allowed(filename: str) -> bool:
     return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
 
 
+def redirect_to_login():
+    return (
+        "<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\" />"
+        "<meta http-equiv=\"refresh\" content=\"0; url=/login\" /></head>"
+        "<body><a href=\"/login\">Перейти к входу</a></body></html>",
+        302,
+    )
+
+
 @app.route("/")
 def index():
+    if not session.get("user"):
+        return redirect_to_login()
     return send_from_directory(BASE_DIR, "iisstart.htm")
+
+
+@app.route("/app")
+def app_page():
+    if not session.get("user"):
+        return redirect_to_login()
+    return send_from_directory(BASE_DIR, "iisstart.htm")
+
+
+@app.route("/login")
+def login_page():
+    if session.get("user"):
+        return (
+            "<!doctype html><html lang=\"ru\"><head><meta charset=\"utf-8\" />"
+            "<meta http-equiv=\"refresh\" content=\"0; url=/app\" /></head>"
+            "<body><a href=\"/app\">Перейти</a></body></html>",
+            302,
+        )
+    return send_from_directory(BASE_DIR, "login.htm")
 
 
 @app.route("/api/auth/status")
