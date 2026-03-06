@@ -404,6 +404,12 @@
         removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
       };
 
+      const forceClearRemovalButton = () => {
+        isRemovalMode = false;
+        servicesGrid.classList.remove('is-removal-mode');
+        removeModeButton.classList.remove('is-active', 'is-remove-active');
+      };
+
       const openModal = modal => {
         modal.classList.add('is-active');
         modal.setAttribute('aria-hidden', 'false');
@@ -426,7 +432,7 @@
       };
 
       const openAddServiceForm = () => {
-        isRemovalMode = false;
+        forceClearRemovalButton();
         isEditMode = false;
         syncModeButtons();
         resetServiceForm();
@@ -456,7 +462,7 @@
       });
 
       backgroundButton.addEventListener('click', () => {
-        isRemovalMode = false;
+        forceClearRemovalButton();
         isEditMode = false;
         syncModeButtons();
         openModal(backgroundModal);
@@ -478,17 +484,13 @@
 
       editModeButton.addEventListener('click', () => {
         isEditMode = !isEditMode;
-        if (isEditMode) {
-          isRemovalMode = false;
-        }
+        forceClearRemovalButton();
         syncModeButtons();
       });
 
       removeModeButton.addEventListener('click', () => {
         isRemovalMode = !isRemovalMode;
-        if (isRemovalMode) {
-          isEditMode = false;
-        }
+        isEditMode = false;
         syncModeButtons();
       });
 
