@@ -503,6 +503,9 @@
       });
 
       editModeButton.addEventListener('click', () => {
+        if (isRemovalMode) {
+          forceClearRemovalButton();
+        }
         isEditMode = !isEditMode;
         syncModeButtons();
         editModeButton.blur();
@@ -825,7 +828,8 @@
         }
 
         if (isRemovalMode) {
-          return;
+          forceClearRemovalButton();
+          syncModeButtons();
         }
 
         if (isEditMode || event.target.closest('.service-card__edit')) {
