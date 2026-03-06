@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Home Services Dashboard</title>
-    <link rel="stylesheet" href="css.css" />
+    <link rel="stylesheet" href="css.css?v=2" />
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   </head>
   <body>
@@ -396,12 +396,20 @@
       let editingServiceIcon = '';
 
       const syncModeButtons = () => {
-        servicesGrid.classList.toggle('is-edit-mode', isEditMode);
-        servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
-        editModeButton.classList.toggle('is-active', isEditMode);
-        editModeButton.classList.toggle('is-edit-active', isEditMode);
-        removeModeButton.classList.toggle('is-active', isRemovalMode);
-        removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
+        if (isEditMode) {
+          servicesGrid.classList.add('is-edit-mode');
+          editModeButton.classList.add('is-active', 'is-edit-active');
+        } else {
+          servicesGrid.classList.remove('is-edit-mode');
+          editModeButton.classList.remove('is-active', 'is-edit-active');
+        }
+        if (isRemovalMode) {
+          servicesGrid.classList.add('is-removal-mode');
+          removeModeButton.classList.add('is-active', 'is-remove-active');
+        } else {
+          servicesGrid.classList.remove('is-removal-mode');
+          removeModeButton.classList.remove('is-active', 'is-remove-active');
+        }
       };
 
       const forceClearRemovalButton = () => {
@@ -487,6 +495,7 @@
         forceClearRemovalButton();
         syncModeButtons();
         removeModeButton.classList.remove('is-active', 'is-remove-active');
+        console.log('[edit click] isRemovalMode=', isRemovalMode, 'removeModeButton classes=', removeModeButton.className);
       });
 
       removeModeButton.addEventListener('click', () => {
