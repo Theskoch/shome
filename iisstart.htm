@@ -503,9 +503,7 @@
       });
 
       editModeButton.addEventListener('click', () => {
-        if (isRemovalMode) {
-          forceClearRemovalButton();
-        }
+        forceClearRemovalButton();
         isEditMode = !isEditMode;
         syncModeButtons();
         editModeButton.blur();
@@ -516,6 +514,25 @@
         syncModeButtons();
         removeModeButton.blur();
       });
+
+      const maybeClearRemovalMode = event => {
+        if (!isRemovalMode) {
+          return;
+        }
+
+        if (event.target.closest('#toggle-remove-mode-v2')) {
+          return;
+        }
+
+        if (event.target.closest('.service-card__remove')) {
+          return;
+        }
+
+        forceClearRemovalButton();
+        syncModeButtons();
+      };
+
+      document.addEventListener('click', maybeClearRemovalMode);
 
       const normalizeService = service => ({
         id: service.id || generateId(),
@@ -833,6 +850,7 @@
         }
 
         if (isEditMode || event.target.closest('.service-card__edit')) {
+          forceClearRemovalButton();
           const id = card.id;
           const service = services.find(item => item.id === id);
           if (service && !service.isModal) {
