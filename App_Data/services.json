@@ -36,7 +36,7 @@
   },
   {
     "id": "id-mmchg2ai-jbflqh",
-    "title": "Nginx Proxy Manager",
+    "title": "Nginx PM",
     "url": "https://proxy.home.local/login",
     "icon": "nginxproxy.svg",
     "isModal": false
