@@ -84,6 +84,21 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.icon-button:focus,
+.icon-button:focus-visible {
+  outline: none;
+}
+
+.icon-button:not(.is-active):not(.is-edit-active):not(.is-remove-active) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.icon-button:not(.is-active):not(.is-edit-active):not(.is-remove-active):hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .icon-button.is-active {
   background: rgba(255, 255, 255, 0.35);
 }
