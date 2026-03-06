@@ -16,10 +16,10 @@
         <button class="icon-button" id="open-add-service" type="button" aria-label="Add service">
           ➕
         </button>
-        <button class="icon-button" id="toggle-edit-mode" type="button" aria-label="Edit services">
+        <button class="icon-button" id="toggle-edit-mode-v2" type="button" aria-label="Edit services">
           ✏️
         </button>
-        <button class="icon-button" id="toggle-remove-mode" type="button" aria-label="Remove services">
+        <button class="icon-button" id="toggle-remove-mode-v2" type="button" aria-label="Remove services">
           🗑️
         </button>
         <button class="icon-button" id="open-background-picker" type="button" aria-label="Change background">
@@ -344,7 +344,7 @@
 
       // Add/edit/remove services
       const addServiceButton = document.getElementById('open-add-service');
-      const editModeButton = document.getElementById('toggle-edit-mode');
+      const editModeButton = document.getElementById('toggle-edit-mode-v2');
       const addServiceModal = document.getElementById('add-service-modal');
       const closeAddService = document.getElementById('close-add-service');
       const backgroundButton = document.getElementById('open-background-picker');
@@ -362,7 +362,7 @@
       const backgroundPreview = document.getElementById('background-preview');
       const backgroundUrlInput = document.getElementById('background-url');
       const servicesGrid = document.getElementById('services-grid');
-      const removeModeButton = document.getElementById('toggle-remove-mode');
+      const removeModeButton = document.getElementById('toggle-remove-mode-v2');
       const dropzone = document.getElementById('upload-dropzone');
       const iconFileInput = document.getElementById('icon-file');
       const iconUrlInput = document.getElementById('icon-url');
@@ -399,13 +399,22 @@
         if (isEditMode) {
           servicesGrid.classList.add('is-edit-mode');
           editModeButton.classList.add('is-active', 'is-edit-active');
+          
+          isRemovalMode = false;
+          servicesGrid.classList.remove('is-removal-mode');
+          removeModeButton.classList.remove('is-active', 'is-remove-active');
         } else {
           servicesGrid.classList.remove('is-edit-mode');
           editModeButton.classList.remove('is-active', 'is-edit-active');
         }
+        
         if (isRemovalMode) {
           servicesGrid.classList.add('is-removal-mode');
           removeModeButton.classList.add('is-active', 'is-remove-active');
+          
+          isEditMode = false;
+          servicesGrid.classList.remove('is-edit-mode');
+          editModeButton.classList.remove('is-active', 'is-edit-active');
         } else {
           servicesGrid.classList.remove('is-removal-mode');
           removeModeButton.classList.remove('is-active', 'is-remove-active');
@@ -448,6 +457,9 @@
       };
 
       const openEditServiceForm = service => {
+        forceClearRemovalButton();
+        isEditMode = false;
+        syncModeButtons();
         resetServiceForm();
         editingServiceId = service.id;
         editingServiceIcon = service.icon || '';
@@ -492,14 +504,12 @@
 
       editModeButton.addEventListener('click', () => {
         isEditMode = !isEditMode;
-        isRemovalMode = false;
         syncModeButtons();
         editModeButton.blur();
       });
 
       removeModeButton.addEventListener('click', () => {
         isRemovalMode = !isRemovalMode;
-        isEditMode = false;
         syncModeButtons();
         removeModeButton.blur();
       });
