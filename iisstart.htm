@@ -303,7 +303,7 @@
     <!-- Easter egg: light theme -->
     <button id="light-theme-btn" class="light-theme-btn" type="button">☀️ Light theme</button>
     <div class="light-overlay" id="light-overlay" aria-hidden="true">
-      <div class="light-overlay__text" id="light-overlay-text">Иди на хуй!</div>
+      <div class="light-overlay__text" id="light-overlay-text">Have a great day!</div>
     </div>
 
     <script>
@@ -395,6 +395,15 @@
       let editingServiceId = '';
       let editingServiceIcon = '';
 
+      const syncModeButtons = () => {
+        servicesGrid.classList.toggle('is-edit-mode', isEditMode);
+        servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
+        editModeButton.classList.toggle('is-active', isEditMode);
+        editModeButton.classList.toggle('is-edit-active', isEditMode);
+        removeModeButton.classList.toggle('is-active', isRemovalMode);
+        removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
+      };
+
       const openModal = modal => {
         modal.classList.add('is-active');
         modal.setAttribute('aria-hidden', 'false');
@@ -417,6 +426,9 @@
       };
 
       const openAddServiceForm = () => {
+        isRemovalMode = false;
+        isEditMode = false;
+        syncModeButtons();
         resetServiceForm();
         openModal(addServiceModal);
       };
@@ -443,7 +455,12 @@
         resetServiceForm();
       });
 
-      backgroundButton.addEventListener('click', () => openModal(backgroundModal));
+      backgroundButton.addEventListener('click', () => {
+        isRemovalMode = false;
+        isEditMode = false;
+        syncModeButtons();
+        openModal(backgroundModal);
+      });
       closeBackgroundModal.addEventListener('click', () => closeModal(backgroundModal));
 
       addServiceModal.addEventListener('click', event => {
@@ -461,28 +478,18 @@
 
       editModeButton.addEventListener('click', () => {
         isEditMode = !isEditMode;
-        servicesGrid.classList.toggle('is-edit-mode', isEditMode);
-        editModeButton.classList.toggle('is-active', isEditMode);
-        editModeButton.classList.toggle('is-edit-active', isEditMode);
         if (isEditMode) {
           isRemovalMode = false;
-          servicesGrid.classList.remove('is-removal-mode');
-          removeModeButton.classList.remove('is-active');
-          removeModeButton.classList.remove('is-remove-active');
         }
+        syncModeButtons();
       });
 
       removeModeButton.addEventListener('click', () => {
         isRemovalMode = !isRemovalMode;
-        servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
-        removeModeButton.classList.toggle('is-active', isRemovalMode);
-        removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
         if (isRemovalMode) {
           isEditMode = false;
-          servicesGrid.classList.remove('is-edit-mode');
-          editModeButton.classList.remove('is-active');
-          editModeButton.classList.remove('is-edit-active');
         }
+        syncModeButtons();
       });
 
       const normalizeService = service => ({
