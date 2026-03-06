@@ -486,12 +486,14 @@
         isEditMode = !isEditMode;
         forceClearRemovalButton();
         syncModeButtons();
+        removeModeButton.classList.remove('is-active', 'is-remove-active');
       });
 
       removeModeButton.addEventListener('click', () => {
         isRemovalMode = !isRemovalMode;
         isEditMode = false;
         syncModeButtons();
+        editModeButton.classList.remove('is-active', 'is-edit-active');
       });
 
       const normalizeService = service => ({
