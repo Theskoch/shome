@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Home Services Dashboard</title>
-    <link rel="stylesheet" href="css.css?v=2" />
+    <link rel="stylesheet" href="css.css?v=3" />
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   </head>
   <body>
@@ -492,17 +492,16 @@
 
       editModeButton.addEventListener('click', () => {
         isEditMode = !isEditMode;
-        forceClearRemovalButton();
+        isRemovalMode = false;
         syncModeButtons();
-        removeModeButton.classList.remove('is-active', 'is-remove-active');
-        console.log('[edit click] isRemovalMode=', isRemovalMode, 'removeModeButton classes=', removeModeButton.className);
+        editModeButton.blur();
       });
 
       removeModeButton.addEventListener('click', () => {
         isRemovalMode = !isRemovalMode;
         isEditMode = false;
         syncModeButtons();
-        editModeButton.classList.remove('is-active', 'is-edit-active');
+        removeModeButton.blur();
       });
 
       const normalizeService = service => ({

@@ -85,18 +85,19 @@ body {
 }
 
 .icon-button:focus,
-.icon-button:focus-visible {
+.icon-button:focus-visible,
+.icon-button:active {
   outline: none;
 }
 
 .icon-button:not(.is-active):not(.is-edit-active):not(.is-remove-active) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
 }
 
 .icon-button:not(.is-active):not(.is-edit-active):not(.is-remove-active):hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2) !important;
 }
 
 .icon-button.is-active {
