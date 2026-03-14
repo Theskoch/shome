@@ -367,10 +367,30 @@
       const iconFileInput = document.getElementById('icon-file');
       const iconUrlInput = document.getElementById('icon-url');
       const uploadPreview = document.getElementById('upload-preview');
-      const settingsApiUrl = '/api/settings';
-      const servicesApiUrl = '/api/services';
-      const uploadApiUrl = '/api/upload';
+      let settingsApiUrl = '/api/settings';
+      let servicesApiUrl = '/api/services';
+      let uploadApiUrl = '/api/upload';
+      const legacyServicesApiUrl = '/ServicesHandler.ashx';
+      const legacyUploadApiUrl = '/UploadHandler.ashx';
       let services = [];
+
+      const fetchWithSoftTimeout = (url, options = {}, timeoutMs = 3500) =>
+        Promise.race([
+          fetch(url, options),
+          new Promise((_, reject) => setTimeout(() => reject(new Error(`timeout: ${url}`)), timeoutMs))
+        ]);
+
+      const dedupeServices = items => {
+        const seen = new Set();
+        return items.filter(item => {
+          const key = item.id || `${item.title}::${item.url}`;
+          if (seen.has(key)) {
+            return false;
+          }
+          seen.add(key);
+          return true;
+        });
+      };
       const generateId = () => {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
           return window.crypto.randomUUID();
@@ -580,7 +600,7 @@
 
       const fetchSettings = async () => {
         try {
-          const response = await fetch(settingsApiUrl, { cache: 'no-store' });
+          const response = await fetchWithSoftTimeout(settingsApiUrl, { cache: 'no-store' });
           if (!response.ok) {
             return;
           }
@@ -592,62 +612,120 @@
       };
 
       const saveSettings = async payload => {
-        const response = await fetch(settingsApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-      };
-
-      const fetchServices = async () => {
         try {
-          const response = await fetch(servicesApiUrl, { cache: 'no-store' });
-          if (!response.ok) {
-            throw new Error('Failed to load services');
-          }
-          const data = await response.json();
-          if (!data || typeof data !== 'object') {
-            services = [];
-          } else if (data.initialized) {
-            services = Array.isArray(data.items) ? data.items.map(normalizeService) : [];
-          } else if (initialServices.length > 0) {
-            services = initialServices.map(normalizeService);
-            await saveServices();
-          } else {
-            services = [];
-          }
-
-          services = services.map(service => ({
-            ...service,
-            icon: service.icon ? service.icon.replace(/^\/?assets\/images\//, '') : ''
-          }));
-
-          renderServices();
+          await fetchWithSoftTimeout(settingsApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          }, 3000);
         } catch (error) {
-          console.error(error);
+          console.warn('Settings endpoint unavailable:', error);
         }
       };
 
+      const fetchServices = async () => {
+        const parseServicesData = data => {
+          if (Array.isArray(data)) {
+            return data.map(normalizeService);
+          }
+          if (!data || typeof data !== 'object') {
+            return [];
+          }
+          if (data.initialized) {
+            return Array.isArray(data.items) ? data.items.map(normalizeService) : [];
+          }
+          if (initialServices.length > 0) {
+            return initialServices.map(normalizeService);
+          }
+          return [];
+        };
+
+        try {
+          let response = await fetchWithSoftTimeout(servicesApiUrl, { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error('Primary services endpoint failed');
+          }
+          let data = await response.json();
+          services = parseServicesData(data);
+        } catch (primaryError) {
+          try {
+            servicesApiUrl = legacyServicesApiUrl;
+            const legacyResponse = await fetchWithSoftTimeout(servicesApiUrl, { cache: 'no-store' });
+            if (!legacyResponse.ok) {
+              throw new Error('Legacy services endpoint failed');
+            }
+            const legacyData = await legacyResponse.json();
+            services = parseServicesData(legacyData);
+          } catch (legacyError) {
+            console.error(primaryError);
+            console.error(legacyError);
+            services = initialServices.map(normalizeService);
+          }
+        }
+
+        services = dedupeServices(
+          services.map(service => ({
+            ...service,
+            icon: service.icon ? service.icon.replace(/^\/?assets\/images\//, '') : ''
+          }))
+        );
+
+        renderServices();
+      };
+
       const saveServices = async () => {
-        const response = await fetch(servicesApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(services)
-        });
+        try {
+          await fetchWithSoftTimeout(servicesApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(services)
+          }, 3000);
+        } catch (error) {
+          if (servicesApiUrl !== legacyServicesApiUrl) {
+            servicesApiUrl = legacyServicesApiUrl;
+            try {
+              await fetchWithSoftTimeout(servicesApiUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(services)
+              }, 3000);
+              return;
+            } catch (legacyError) {
+              console.warn('Legacy save failed:', legacyError);
+              return;
+            }
+          }
+          console.warn('Save services failed:', error);
+        }
       };
 
       const uploadFile = async file => {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch(uploadApiUrl, {
-          method: 'POST',
-          body: formData
-        });
+        let response;
+        try {
+          response = await fetchWithSoftTimeout(uploadApiUrl, {
+            method: 'POST',
+            body: formData
+          }, 5000);
+        } catch (error) {
+          if (uploadApiUrl !== legacyUploadApiUrl) {
+            uploadApiUrl = legacyUploadApiUrl;
+            response = await fetchWithSoftTimeout(uploadApiUrl, {
+              method: 'POST',
+              body: formData
+            }, 5000);
+          } else {
+            throw error;
+          }
+        }
 
         if (!response.ok) {
           throw new Error('Failed to upload file');
@@ -801,7 +879,11 @@
           event.stopPropagation();
           const id = card.id;
           services = services.filter(service => service.id !== id);
-          await saveServices();
+          try {
+            await saveServices();
+          } catch (error) {
+            alert('Не удалось сохранить изменения сервисов');
+          }
           renderServices();
           return;
         }
@@ -830,6 +912,8 @@
         }
       });
 
+      services = dedupeServices(initialServices.map(normalizeService));
+      renderServices();
       fetchServices();
       fetchSettings();
     </script>
