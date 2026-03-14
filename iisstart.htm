@@ -370,6 +370,7 @@
       let settingsApiUrl = '/api/settings';
       let servicesApiUrl = '/api/services';
       let uploadApiUrl = '/api/upload';
+      const legacySettingsApiUrl = '/SettingsHandler.ashx';
       const legacyServicesApiUrl = '/ServicesHandler.ashx';
       const legacyUploadApiUrl = '/UploadHandler.ashx';
       let services = [];
@@ -390,6 +391,26 @@
           seen.add(key);
           return true;
         });
+      };
+
+      const normalizeStoredPath = value => {
+        const raw = (value || '').toString().trim();
+        if (!raw) {
+          return '';
+        }
+        if (raw.startsWith('http://') || raw.startsWith('https://')) {
+          return raw;
+        }
+        if (raw.startsWith('/uploads/') || raw.startsWith('/assets/images/')) {
+          return raw;
+        }
+        if (raw.startsWith('uploads/')) {
+          return `/${raw}`;
+        }
+        if (raw.startsWith('assets/images/')) {
+          return `/${raw}`;
+        }
+        return `/assets/images/${raw.replace(/^\/+/, '')}`;
       };
       const generateId = () => {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -520,21 +541,16 @@
         id: service.id || generateId(),
         title: service.title || 'Untitled',
         url: service.url || '',
-        icon: service.icon || '',
+        icon: normalizeStoredPath(service.icon || ''),
         isModal: service.isModal ?? false
       });
 
       const resolveIconUrl = icon => {
-        if (!icon) {
+        const normalized = normalizeStoredPath(icon);
+        if (!normalized) {
           return 'assets/images/tool.png';
         }
-        if (icon.startsWith('/') || icon.startsWith('http://') || icon.startsWith('https://')) {
-          return icon;
-        }
-        if (icon.startsWith('uploads/')) {
-          return `/${icon}`;
-        }
-        return `assets/images/${icon}`;
+        return normalized;
       };
 
       const renderServices = () => {
@@ -602,12 +618,23 @@
         try {
           const response = await fetchWithSoftTimeout(settingsApiUrl, { cache: 'no-store' });
           if (!response.ok) {
-            return;
+            throw new Error('Primary settings endpoint failed');
           }
           const data = await response.json();
-          applyBackground(data.backgroundUrl || '');
+          applyBackground(normalizeStoredPath(data.backgroundUrl || ''));
         } catch (error) {
-          console.error(error);
+          try {
+            settingsApiUrl = legacySettingsApiUrl;
+            const legacyResponse = await fetchWithSoftTimeout(settingsApiUrl, { cache: 'no-store' });
+            if (!legacyResponse.ok) {
+              throw new Error('Legacy settings endpoint failed');
+            }
+            const legacyData = await legacyResponse.json();
+            applyBackground(normalizeStoredPath(legacyData.backgroundUrl || ''));
+          } catch (legacyError) {
+            console.error(error);
+            console.error(legacyError);
+          }
         }
       };
 
@@ -621,7 +648,22 @@
             body: JSON.stringify(payload)
           }, 3000);
         } catch (error) {
-          console.warn('Settings endpoint unavailable:', error);
+          if (settingsApiUrl !== legacySettingsApiUrl) {
+            settingsApiUrl = legacySettingsApiUrl;
+            try {
+              await fetchWithSoftTimeout(settingsApiUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+              }, 3000);
+              return;
+            } catch (legacyError) {
+              console.warn('Legacy settings save failed:', legacyError);
+            }
+          }
+          throw error;
         }
       };
 
@@ -665,12 +707,7 @@
           }
         }
 
-        services = dedupeServices(
-          services.map(service => ({
-            ...service,
-            icon: service.icon ? service.icon.replace(/^\/?assets\/images\//, '') : ''
-          }))
-        );
+        services = dedupeServices(services.map(normalizeService));
 
         renderServices();
       };
@@ -776,10 +813,10 @@
         try {
           backgroundDropzone.classList.add('is-loading');
           const url = await uploadFile(file);
-          backgroundUrlInput.value = url;
+          backgroundUrlInput.value = normalizeStoredPath(url);
           backgroundPreview.innerHTML = `
             <div class="upload-preview__item">
-              <img src="${url}" alt="${file.name}" class="upload-preview__image" />
+              <img src="${normalizeStoredPath(url)}" alt="${file.name}" class="upload-preview__image" />
               <span class="upload-preview__name">${file.name}</span>
             </div>
           `;
@@ -822,9 +859,13 @@
 
       backgroundForm.addEventListener('submit', async event => {
         event.preventDefault();
-        const url = backgroundUrlInput.value.trim();
+        const url = normalizeStoredPath(backgroundUrlInput.value.trim());
         applyBackground(url);
-        await saveSettings({ backgroundUrl: url });
+        try {
+          await saveSettings({ backgroundUrl: url });
+        } catch (error) {
+          alert('Не удалось сохранить фон на сервере');
+        }
         closeModal(backgroundModal);
       });
 
