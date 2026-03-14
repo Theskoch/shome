@@ -1,4 +1,5 @@
 import json
+import mimetypes
 import sys
 from datetime import datetime, timedelta
 from functools import wraps
@@ -16,7 +17,6 @@ UPLOADS_DIR = BASE_DIR / "uploads"
 SERVICES_FILE = APP_DATA_DIR / "services.json"
 SETTINGS_FILE = APP_DATA_DIR / "settings.json"
 LDAP_CONFIG_FILE = APP_DATA_DIR / "ldap_config.json"
-ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
 
@@ -164,8 +164,38 @@ def save_settings(data):
     SETTINGS_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def is_allowed(filename: str) -> bool:
-    return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
+def is_allowed(file_storage) -> bool:
+    content_type = (getattr(file_storage, "mimetype", "") or "").lower()
+    if content_type.startswith("image/"):
+        return True
+
+    # Fallback: allow any file that has an extension.
+    # This keeps compatibility with uncommon image formats on different clients.
+    filename = getattr(file_storage, "filename", "") or ""
+    return bool(Path(filename).suffix)
+
+
+def extension_from_mimetype(content_type: str) -> str:
+    ctype = (content_type or "").lower()
+    custom_map = {
+        "image/jpg": ".jpg",
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/gif": ".gif",
+        "image/webp": ".webp",
+        "image/svg+xml": ".svg",
+        "image/bmp": ".bmp",
+        "image/x-icon": ".ico",
+        "image/vnd.microsoft.icon": ".ico",
+        "image/tiff": ".tiff",
+        "image/avif": ".avif",
+        "image/heic": ".heic",
+        "image/heif": ".heif",
+    }
+    if ctype in custom_map:
+        return custom_map[ctype]
+    guessed = mimetypes.guess_extension(ctype)
+    return guessed or ".img"
 
 
 def redirect_to_login():
@@ -287,12 +317,14 @@ def upload():
     if file.filename == "":
         return jsonify({"success": False, "message": "No file selected"}), 400
 
-    if not is_allowed(file.filename):
+    if not is_allowed(file):
         return jsonify({"success": False, "message": "Unsupported file type"}), 400
 
     ensure_storage()
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
     safe_name = secure_filename(file.filename)
+    if not Path(safe_name).suffix:
+        safe_name = f"{safe_name}{extension_from_mimetype(getattr(file, 'mimetype', '') or '')}"
     target_name = f"{timestamp}_{safe_name}"
     target_path = UPLOADS_DIR / target_name
     file.save(target_path)

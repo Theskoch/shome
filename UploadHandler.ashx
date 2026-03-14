@@ -9,7 +9,6 @@ using System.Web.Script.Serialization;
 public class UploadHandler : IHttpHandler
 {
     private const string UploadFolder = "~/uploads";
-    private static readonly string[] AllowedExtensions = { ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp" };
 
     public bool IsReusable => false;
 
@@ -34,12 +33,17 @@ public class UploadHandler : IHttpHandler
                 return;
             }
 
-            var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant() ?? string.Empty;
-            if (!AllowedExtensions.Contains(extension))
+            if (!IsAllowed(file))
             {
                 context.Response.StatusCode = 400;
                 WriteJson(context, new { success = false, message = "Недопустимый формат файла" });
                 return;
+            }
+
+            var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = ".bin";
             }
 
             var uploadPath = context.Server.MapPath(UploadFolder);
@@ -66,5 +70,18 @@ public class UploadHandler : IHttpHandler
     {
         var serializer = new JavaScriptSerializer();
         context.Response.Write(serializer.Serialize(data));
+    }
+
+    private bool IsAllowed(HttpPostedFile file)
+    {
+        var contentType = (file.ContentType ?? string.Empty).ToLowerInvariant();
+        if (contentType.StartsWith("image/"))
+        {
+            return true;
+        }
+
+        // Fallback for clients that do not send proper MIME type
+        var extension = Path.GetExtension(file.FileName);
+        return !string.IsNullOrWhiteSpace(extension);
     }
 }

@@ -375,7 +375,7 @@
       const legacyUploadApiUrl = '/UploadHandler.ashx';
       let services = [];
 
-      const fetchWithSoftTimeout = (url, options = {}, timeoutMs = 3500) =>
+      const fetchWithSoftTimeout = (url, options = {}, timeoutMs = 6000) =>
         Promise.race([
           fetch(url, options),
           new Promise((_, reject) => setTimeout(() => reject(new Error(`timeout: ${url}`)), timeoutMs))
@@ -401,16 +401,11 @@
         if (raw.startsWith('http://') || raw.startsWith('https://')) {
           return raw;
         }
-        if (raw.startsWith('/uploads/') || raw.startsWith('/assets/images/')) {
-          return raw;
+        const cleaned = raw.replace(/^\/+/, '');
+        if (cleaned.startsWith('uploads/') || cleaned.startsWith('assets/images/')) {
+          return `/${cleaned}`;
         }
-        if (raw.startsWith('uploads/')) {
-          return `/${raw}`;
-        }
-        if (raw.startsWith('assets/images/')) {
-          return `/${raw}`;
-        }
-        return `/assets/images/${raw.replace(/^\/+/, '')}`;
+        return `/assets/images/${cleaned}`;
       };
       const generateId = () => {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -580,6 +575,9 @@
         image.className = 'service-card__image';
         image.alt = service.title;
         image.src = resolveIconUrl(service.icon);
+        image.addEventListener('error', () => {
+          image.src = '/assets/images/tool.png';
+        });
         iconWrapper.appendChild(image);
 
         const label = document.createElement('span');
@@ -646,7 +644,7 @@
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
-          }, 3000);
+          }, 5000);
         } catch (error) {
           if (settingsApiUrl !== legacySettingsApiUrl) {
             settingsApiUrl = legacySettingsApiUrl;
@@ -657,7 +655,7 @@
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
-              }, 3000);
+              }, 5000);
               return;
             } catch (legacyError) {
               console.warn('Legacy settings save failed:', legacyError);
@@ -720,7 +718,7 @@
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(services)
-          }, 3000);
+          }, 9000);
         } catch (error) {
           if (servicesApiUrl !== legacyServicesApiUrl) {
             servicesApiUrl = legacyServicesApiUrl;
@@ -731,7 +729,7 @@
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(services)
-              }, 3000);
+              }, 9000);
               return;
             } catch (legacyError) {
               console.warn('Legacy save failed:', legacyError);
@@ -751,14 +749,14 @@
           response = await fetchWithSoftTimeout(uploadApiUrl, {
             method: 'POST',
             body: formData
-          }, 5000);
+          }, 8000);
         } catch (error) {
           if (uploadApiUrl !== legacyUploadApiUrl) {
             uploadApiUrl = legacyUploadApiUrl;
             response = await fetchWithSoftTimeout(uploadApiUrl, {
               method: 'POST',
               body: formData
-            }, 5000);
+            }, 15000);
           } else {
             throw error;
           }
@@ -797,7 +795,7 @@
         try {
           dropzone.classList.add('is-loading');
           const url = await uploadFile(file);
-          iconUrlInput.value = url;
+          iconUrlInput.value = normalizeStoredPath(url);
           setPreview(url, file.name);
         } catch (error) {
           alert(error.message);
@@ -878,7 +876,8 @@
         const title = titleRaw ? titleRaw.toString().trim() : '';
         const url = urlRaw ? urlRaw.toString().trim() : '';
         const icon = iconRaw ? iconRaw.toString().trim() : '';
-        const resolvedIcon = icon || editingServiceIcon;
+        const normalizedIcon = normalizeStoredPath(icon);
+        const resolvedIcon = normalizedIcon || normalizeStoredPath(editingServiceIcon);
 
         if (!title || !url) {
           return;
@@ -899,7 +898,7 @@
             id: generateId(),
             title,
             url,
-            icon,
+            icon: normalizedIcon,
             isModal: false
           });
         }
