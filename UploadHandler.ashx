@@ -1,8 +1,8 @@
 <%@ WebHandler Language="C#" Class="UploadHandler" %>
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Web;
 using System.Web.Script.Serialization;
 
@@ -43,7 +43,7 @@ public class UploadHandler : IHttpHandler
             var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(extension))
             {
-                extension = ".bin";
+                extension = GuessExtension(file.ContentType);
             }
 
             var uploadPath = context.Server.MapPath(UploadFolder);
@@ -83,5 +83,33 @@ public class UploadHandler : IHttpHandler
         // Fallback for clients that do not send proper MIME type
         var extension = Path.GetExtension(file.FileName);
         return !string.IsNullOrWhiteSpace(extension);
+    }
+
+    private string GuessExtension(string contentType)
+    {
+        var ctype = (contentType ?? string.Empty).ToLowerInvariant();
+        var map = new Dictionary<string, string>
+        {
+            { "image/jpeg", ".jpg" },
+            { "image/jpg", ".jpg" },
+            { "image/png", ".png" },
+            { "image/gif", ".gif" },
+            { "image/webp", ".webp" },
+            { "image/svg+xml", ".svg" },
+            { "image/bmp", ".bmp" },
+            { "image/x-icon", ".ico" },
+            { "image/vnd.microsoft.icon", ".ico" },
+            { "image/tiff", ".tiff" },
+            { "image/avif", ".avif" },
+            { "image/heic", ".heic" },
+            { "image/heif", ".heif" }
+        };
+
+        if (map.ContainsKey(ctype))
+        {
+            return map[ctype];
+        }
+
+        return ".img";
     }
 }

@@ -125,15 +125,20 @@ def save_services(data):
 def normalize_icon_path(icon: str) -> str:
     if not icon:
         return ""
+    icon = icon.strip()
+    if not icon:
+        return ""
     if icon.startswith("/uploads/"):
         return icon
+    if icon.startswith("uploads/"):
+        return f"/{icon}"
     if icon.startswith("/assets/images/"):
         return icon
     if icon.startswith("assets/images/"):
         return f"/{icon}"
     if icon.startswith("http://") or icon.startswith("https://"):
         return icon
-    return f"/assets/images/{icon}"
+    return f"/assets/images/{icon.lstrip('/')}"
 
 
 def cleanup_unused_uploads(services_data: list[dict]) -> None:
@@ -272,6 +277,18 @@ def services():
         items = load_services()
         if items is None:
             return jsonify({"initialized": False, "items": []})
+        normalized_items = []
+        changed = False
+        for service in items:
+            if not isinstance(service, dict):
+                continue
+            normalized_icon = normalize_icon_path(str(service.get("icon", "")))
+            if normalized_icon != str(service.get("icon", "")):
+                changed = True
+            normalized_items.append({**service, "icon": normalized_icon})
+        if changed:
+            save_services(normalized_items)
+            items = normalized_items
         return jsonify({"initialized": True, "items": items})
     data = request.get_json(silent=True)
     if not isinstance(data, list):

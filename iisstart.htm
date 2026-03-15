@@ -367,12 +367,9 @@
       const iconFileInput = document.getElementById('icon-file');
       const iconUrlInput = document.getElementById('icon-url');
       const uploadPreview = document.getElementById('upload-preview');
-      let settingsApiUrl = '/api/settings';
-      let servicesApiUrl = '/api/services';
-      let uploadApiUrl = '/api/upload';
-      const legacySettingsApiUrl = '/SettingsHandler.ashx';
-      const legacyServicesApiUrl = '/ServicesHandler.ashx';
-      const legacyUploadApiUrl = '/UploadHandler.ashx';
+      const settingsApiUrl = '/api/settings';
+      const servicesApiUrl = '/api/services';
+      const uploadApiUrl = '/api/upload';
       let services = [];
 
       const fetchWithSoftTimeout = (url, options = {}, timeoutMs = 6000) =>
@@ -627,18 +624,7 @@
           const data = await response.json();
           applyBackground(normalizeStoredPath(data.backgroundUrl || ''));
         } catch (error) {
-          try {
-            settingsApiUrl = legacySettingsApiUrl;
-            const legacyResponse = await fetchWithSoftTimeout(settingsApiUrl, { cache: 'no-store' });
-            if (!legacyResponse.ok) {
-              throw new Error('Legacy settings endpoint failed');
-            }
-            const legacyData = await legacyResponse.json();
-            applyBackground(normalizeStoredPath(legacyData.backgroundUrl || ''));
-          } catch (legacyError) {
-            console.error(error);
-            console.error(legacyError);
-          }
+          console.error(error);
         }
       };
 
@@ -652,21 +638,6 @@
             body: JSON.stringify(payload)
           }, 5000);
         } catch (error) {
-          if (settingsApiUrl !== legacySettingsApiUrl) {
-            settingsApiUrl = legacySettingsApiUrl;
-            try {
-              await fetchWithSoftTimeout(settingsApiUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-              }, 5000);
-              return;
-            } catch (legacyError) {
-              console.warn('Legacy settings save failed:', legacyError);
-            }
-          }
           throw error;
         }
       };
@@ -696,19 +667,8 @@
           let data = await response.json();
           services = parseServicesData(data);
         } catch (primaryError) {
-          try {
-            servicesApiUrl = legacyServicesApiUrl;
-            const legacyResponse = await fetchWithSoftTimeout(servicesApiUrl, { cache: 'no-store' });
-            if (!legacyResponse.ok) {
-              throw new Error('Legacy services endpoint failed');
-            }
-            const legacyData = await legacyResponse.json();
-            services = parseServicesData(legacyData);
-          } catch (legacyError) {
-            console.error(primaryError);
-            console.error(legacyError);
-            services = initialServices.map(normalizeService);
-          }
+          console.error(primaryError);
+          services = initialServices.map(normalizeService);
         }
 
         services = dedupeServices(services.map(normalizeService));
@@ -726,23 +686,7 @@
             body: JSON.stringify(services)
           }, 9000);
         } catch (error) {
-          if (servicesApiUrl !== legacyServicesApiUrl) {
-            servicesApiUrl = legacyServicesApiUrl;
-            try {
-              await fetchWithSoftTimeout(servicesApiUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(services)
-              }, 9000);
-              return;
-            } catch (legacyError) {
-              console.warn('Legacy save failed:', legacyError);
-              return;
-            }
-          }
-          console.warn('Save services failed:', error);
+          throw error;
         }
       };
 
@@ -757,15 +701,7 @@
             body: formData
           }, 8000);
         } catch (error) {
-          if (uploadApiUrl !== legacyUploadApiUrl) {
-            uploadApiUrl = legacyUploadApiUrl;
-            response = await fetchWithSoftTimeout(uploadApiUrl, {
-              method: 'POST',
-              body: formData
-            }, 15000);
-          } else {
-            throw error;
-          }
+          throw error;
         }
 
         if (!response.ok) {
