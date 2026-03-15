@@ -403,9 +403,9 @@
         }
         const cleaned = raw.replace(/^\/+/, '');
         if (cleaned.startsWith('uploads/') || cleaned.startsWith('assets/images/')) {
-          return `/${cleaned}`;
+          return cleaned;
         }
-        return `/assets/images/${cleaned}`;
+        return `assets/images/${cleaned}`;
       };
       const generateId = () => {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -575,9 +575,15 @@
         image.className = 'service-card__image';
         image.alt = service.title;
         image.src = resolveIconUrl(service.icon);
-        image.addEventListener('error', () => {
-          image.src = '/assets/images/tool.png';
-        });
+        const handleImageError = () => {
+          if (image.dataset.fallbackApplied === '1') {
+            image.removeEventListener('error', handleImageError);
+            return;
+          }
+          image.dataset.fallbackApplied = '1';
+          image.src = 'assets/images/tool.png';
+        };
+        image.addEventListener('error', handleImageError);
         iconWrapper.appendChild(image);
 
         const label = document.createElement('span');
