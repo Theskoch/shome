@@ -193,6 +193,7 @@ option,
   text-align: center;
   border-radius: 0 0 10px 10px;
   font-size: 18px;
+  letter-spacing: 0.3px;
 }
 
 .service-card__remove {
