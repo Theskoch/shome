@@ -103,7 +103,6 @@ option,
 }
 
 .icon-button:hover {
-  transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.2);
 }
 

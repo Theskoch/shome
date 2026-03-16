@@ -431,6 +431,21 @@
         if (removeModeIcon) {
           removeModeIcon.src = isRemovalMode ? ICONS.remove.enabled : ICONS.remove.disabled;
         }
+
+        // Если кнопка сейчас под курсором, сразу применяем hover-состояние,
+        // даже когда режим только что был выключен кликом.
+        if (editModeButton.matches(':hover') && editModeIcon) {
+          editModeIcon.src = ICONS.edit.enabled;
+        }
+        if (removeModeButton.matches(':hover') && removeModeIcon) {
+          removeModeIcon.src = ICONS.remove.enabled;
+        }
+        if (addServiceButton.matches(':hover') && addServiceIcon) {
+          addServiceIcon.src = ICONS.add.enabled;
+        }
+        if (backgroundButton.matches(':hover') && backgroundIcon) {
+          backgroundIcon.src = ICONS.background.enabled;
+        }
       };
 
       const bindHoverEnabledState = (button, iconElement, getCurrentSrc, enabledSrc) => {
