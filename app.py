@@ -133,6 +133,10 @@ def normalize_icon_path(icon: str) -> str:
     if icon.startswith("uploads/"):
         return f"/{icon}"
     if icon.startswith("/assets/images/"):
+        return f"/uploads/{Path(icon).name}"
+    if icon.startswith("assets/images/"):
+        return f"/uploads/{Path(icon).name}"
+    if icon.startswith("/assets/images/"):
         return icon
     if icon.startswith("/assets/"):
         return icon
