@@ -1,7 +1,7 @@
 @font-face {
-  font-family: "Nexa Light";
-  src: url("/assets/fonts/nexalight.ttf") format("truetype");
-  font-weight: 300;
+  font-family: "Yantramanav Thin";
+  src: url("/assets/fonts/Yantramanav-Thin.ttf") format("truetype");
+  font-weight: 100;
   font-style: normal;
   font-display: swap;
 }
@@ -22,7 +22,7 @@ body {
   padding-top: 30px;
   overflow: hidden;
   color: #ffffff;
-  font-family: "Nexa Light", sans-serif;
+  font-family: "Yantramanav Thin", sans-serif;
 }
 
 .login-page {
@@ -43,12 +43,12 @@ textarea,
 select,
 option,
 * {
-  font-family: "Nexa Light", sans-serif;
+  font-family: "Yantramanav Thin", sans-serif;
 }
 
 *::before,
 *::after {
-  font-family: "Nexa Light", sans-serif;
+  font-family: "Yantramanav Thin", sans-serif;
 }
 
 /* Контейнер страницы */
@@ -192,7 +192,7 @@ option,
   background: #353535;
   text-align: center;
   border-radius: 0 0 10px 10px;
-  font-size: 16px;
+  font-size: 18pt;
 }
 
 .service-card__remove {
