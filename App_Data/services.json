@@ -158,13 +158,7 @@
     "title": "OpenSpeedTest",
     "url": "http://speedtest.home.local/",
     "icon": "/uploads/20260316185746249349_openwrt.png",
-    "isModal": false
-  },
-  {
-    "id": "open-kuma-modal",
-    "title": "Uptime Kuma",
-    "url": "",
-    "icon": "/uploads/Uptime-Kuma-Logo.png",
+
     "isModal": true
   }
 ]

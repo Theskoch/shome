@@ -225,25 +225,8 @@
           <span class="service-card__remove" aria-hidden="true">✕</span>
         </button>
 
-        <button class="service-card" id="open-kuma-modal" type="button" data-url="" data-modal="true">
-          <span class="service-card__icon">
-            <img src="/uploads/Uptime-Kuma-Logo.png" class="service-card__image" alt="Uptime Kuma" />
-          </span>
-          <span class="service-card__label">Uptime Kuma</span>
-          <span class="service-card__remove" aria-hidden="true">✕</span>
-        </button>
       </section>
     </main>
-
-    <!-- Uptime Kuma modal -->
-    <div class="modal-backdrop" id="kuma-modal" aria-hidden="true">
-      <div class="modal" role="dialog" aria-modal="true" aria-label="Uptime Kuma">
-        <button class="modal__close" id="close-kuma-modal" type="button" aria-label="Close">
-          &times;
-        </button>
-        <iframe class="modal__frame" src="http://188.253.16.197:3001/status/theskochstat" title="Uptime Kuma status"></iframe>
-      </div>
-    </div>
 
     <!-- Add service modal -->
     <div class="modal-backdrop" id="add-service-modal" aria-hidden="true">
@@ -309,29 +292,6 @@
     </div>
 
     <script>
-      // Uptime Kuma modal
-      const kumaModal = document.getElementById('kuma-modal');
-      const openKumaModal = document.getElementById('open-kuma-modal');
-      const closeKumaModal = document.getElementById('close-kuma-modal');
-
-      const openKumaStatus = () => {
-        kumaModal.classList.add('is-active');
-        kumaModal.setAttribute('aria-hidden', 'false');
-      };
-
-      const closeKumaStatus = () => {
-        kumaModal.classList.remove('is-active');
-        kumaModal.setAttribute('aria-hidden', 'true');
-      };
-
-      closeKumaModal.addEventListener('click', closeKumaStatus);
-
-      kumaModal.addEventListener('click', event => {
-        if (event.target === kumaModal) {
-          closeKumaStatus();
-        }
-      });
-
       // Easter egg: light theme
       const lightThemeButton = document.getElementById('light-theme-btn');
       const themeButtonIcon = document.getElementById('theme-button-icon');
@@ -429,7 +389,7 @@
           title: label ? (label.textContent || '').trim() : 'Untitled',
           url: card.dataset.url || '',
           icon: image ? image.getAttribute('src') || '' : '',
-          isModal: card.id === 'open-kuma-modal'
+          isModal: false
         };
       });
       servicesGrid.innerHTML = '';
@@ -897,11 +857,6 @@
           if (service && !service.isModal) {
             openEditServiceForm(service);
           }
-          return;
-        }
-
-        if (card.dataset.modal === 'true') {
-          openKumaStatus();
           return;
         }
 
