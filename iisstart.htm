@@ -300,7 +300,7 @@
 
       lightThemeButton.addEventListener('click', () => {
         if (themeButtonIcon) {
-          themeButtonIcon.src = 'assets/theme_enabled.svg';
+          themeButtonIcon.src = '/assets/theme_enabled.svg';
         }
         lightThemeButton.style.display = 'none';
         lightOverlay.classList.add('is-active');
@@ -407,10 +407,10 @@
         removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
 
         if (editModeIcon) {
-          editModeIcon.src = isEditMode ? 'assets/edit_enabled.svg' : 'assets/edit_disabled.svg';
+          editModeIcon.src = isEditMode ? '/assets/edit_enabled.svg' : '/assets/edit_disabled.svg';
         }
         if (removeModeIcon) {
-          removeModeIcon.src = isRemovalMode ? 'assets/delete_enabled.svg' : 'assets/delete_disabled.svg';
+          removeModeIcon.src = isRemovalMode ? '/assets/delete_enabled.svg' : '/assets/delete_disabled.svg';
         }
       };
 
