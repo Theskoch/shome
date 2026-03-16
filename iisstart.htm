@@ -630,7 +630,14 @@
         editBadge.setAttribute('aria-label', 'Edit');
         editBadge.setAttribute('role', 'button');
         editBadge.setAttribute('tabindex', '0');
-        editBadge.textContent = '✏️';
+        const editBadgeIcon = document.createElement('img');
+        editBadgeIcon.src = ICONS.edit.enabled;
+        editBadgeIcon.alt = '';
+        editBadgeIcon.setAttribute('aria-hidden', 'true');
+        editBadgeIcon.style.width = '14px';
+        editBadgeIcon.style.height = '14px';
+        editBadgeIcon.style.objectFit = 'contain';
+        editBadge.appendChild(editBadgeIcon);
 
         const remove = document.createElement('span');
         remove.className = 'service-card__remove';
