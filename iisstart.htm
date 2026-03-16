@@ -398,6 +398,25 @@
       let editingServiceId = '';
       let editingServiceIcon = '';
 
+      const ICONS = {
+        add: {
+          enabled: '/assets/add_enabled.svg',
+          disabled: '/assets/add_disabled.svg'
+        },
+        edit: {
+          enabled: '/assets/edit_enabled.svg',
+          disabled: '/assets/edit_disabled.svg'
+        },
+        remove: {
+          enabled: '/assets/delete_enabled.svg',
+          disabled: '/assets/delete_disabled.svg'
+        },
+        background: {
+          enabled: '/assets/img_enabled.svg',
+          disabled: '/assets/img_disabled.svg'
+        }
+      };
+
       const syncModeButtons = () => {
         servicesGrid.classList.toggle('is-edit-mode', isEditMode);
         servicesGrid.classList.toggle('is-removal-mode', isRemovalMode);
@@ -407,12 +426,39 @@
         removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
 
         if (editModeIcon) {
-          editModeIcon.src = isEditMode ? '/assets/edit_enabled.svg' : '/assets/edit_disabled.svg';
+          editModeIcon.src = isEditMode ? ICONS.edit.enabled : ICONS.edit.disabled;
         }
         if (removeModeIcon) {
-          removeModeIcon.src = isRemovalMode ? '/assets/delete_enabled.svg' : '/assets/delete_disabled.svg';
+          removeModeIcon.src = isRemovalMode ? ICONS.remove.enabled : ICONS.remove.disabled;
         }
       };
+
+      const bindHoverEnabledState = (button, iconElement, getCurrentSrc, enabledSrc) => {
+        if (!button || !iconElement) {
+          return;
+        }
+        button.addEventListener('mouseenter', () => {
+          iconElement.src = enabledSrc;
+        });
+        button.addEventListener('mouseleave', () => {
+          iconElement.src = getCurrentSrc();
+        });
+      };
+
+      bindHoverEnabledState(addServiceButton, addServiceIcon, () => ICONS.add.disabled, ICONS.add.enabled);
+      bindHoverEnabledState(
+        editModeButton,
+        editModeIcon,
+        () => (isEditMode ? ICONS.edit.enabled : ICONS.edit.disabled),
+        ICONS.edit.enabled
+      );
+      bindHoverEnabledState(
+        removeModeButton,
+        removeModeIcon,
+        () => (isRemovalMode ? ICONS.remove.enabled : ICONS.remove.disabled),
+        ICONS.remove.enabled
+      );
+      bindHoverEnabledState(backgroundButton, backgroundIcon, () => ICONS.background.disabled, ICONS.background.enabled);
 
       const forceClearRemovalButton = () => {
         isRemovalMode = false;
