@@ -4,6 +4,7 @@ import sys
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
+from typing import Dict, Optional
 
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR / "_pydeps"))
@@ -19,11 +20,40 @@ SETTINGS_FILE = APP_DATA_DIR / "settings.json"
 LDAP_CONFIG_FILE = APP_DATA_DIR / "ldap_config.json"
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
+_uploads_name_map_cache: Optional[Dict[str, str]] = None
 
 
 def ensure_storage():
     APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def get_uploads_name_map() -> dict[str, str]:
+    global _uploads_name_map_cache
+    if _uploads_name_map_cache is not None:
+        return _uploads_name_map_cache
+    ensure_storage()
+    _uploads_name_map_cache = {
+        p.name.lower(): p.name
+        for p in UPLOADS_DIR.iterdir()
+        if p.is_file()
+    }
+    return _uploads_name_map_cache
+
+
+def invalidate_uploads_name_map() -> None:
+    global _uploads_name_map_cache
+    _uploads_name_map_cache = None
+
+
+def resolve_upload_filename(filename: str) -> str:
+    if not filename:
+        return ""
+    name = Path(filename).name
+    if not name:
+        return ""
+    mapping = get_uploads_name_map()
+    return mapping.get(name.lower(), name)
 
 
 def load_ldap_config() -> dict:
@@ -120,6 +150,7 @@ def load_services():
 def save_services(data):
     ensure_storage()
     SERVICES_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    invalidate_uploads_name_map()
 
 
 def normalize_icon_path(icon: str) -> str:
@@ -129,24 +160,20 @@ def normalize_icon_path(icon: str) -> str:
     if not icon:
         return ""
     if icon.startswith("/uploads/"):
-        return icon
+        return f"/uploads/{resolve_upload_filename(icon)}"
     if icon.startswith("uploads/"):
-        return f"/{icon}"
+        return f"/uploads/{resolve_upload_filename(icon)}"
     if icon.startswith("/assets/images/"):
-        return f"/uploads/{Path(icon).name}"
+        return f"/uploads/{resolve_upload_filename(icon)}"
     if icon.startswith("assets/images/"):
-        return f"/uploads/{Path(icon).name}"
-    if icon.startswith("/assets/images/"):
-        return icon
+        return f"/uploads/{resolve_upload_filename(icon)}"
     if icon.startswith("/assets/"):
         return icon
-    if icon.startswith("assets/images/"):
-        return f"/{icon}"
     if icon.startswith("assets/"):
         return f"/{icon}"
     if icon.startswith("http://") or icon.startswith("https://"):
         return icon
-    return f"/assets/images/{icon.lstrip('/')}"
+    return f"/uploads/{resolve_upload_filename(icon)}"
 
 
 def cleanup_unused_uploads(services_data: list[dict]) -> None:
@@ -181,6 +208,7 @@ def load_settings():
 def save_settings(data):
     ensure_storage()
     SETTINGS_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    invalidate_uploads_name_map()
 
 
 def is_allowed(file_storage) -> bool:
@@ -359,6 +387,7 @@ def upload():
     target_name = f"{timestamp}_{safe_name}"
     target_path = UPLOADS_DIR / target_name
     file.save(target_path)
+    invalidate_uploads_name_map()
 
     return jsonify({"success": True, "url": f"/uploads/{target_name}"})
 
