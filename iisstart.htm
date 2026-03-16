@@ -14,16 +14,16 @@
       <!-- Action buttons -->
       <div class="page-actions" aria-label="Quick actions">
         <button class="icon-button" id="open-add-service" type="button" aria-label="Add service">
-          ➕
+          <img class="icon-button__img" src="assets/add_disabled.svg" alt="" aria-hidden="true" />
         </button>
         <button class="icon-button" id="toggle-edit-mode-v2" type="button" aria-label="Edit services">
-          ✏️
+          <img class="icon-button__img" src="assets/edit_disabled.svg" alt="" aria-hidden="true" />
         </button>
         <button class="icon-button" id="toggle-remove-mode-v2" type="button" aria-label="Remove services">
-          🗑️
+          <img class="icon-button__img" src="assets/delete_disabled.svg" alt="" aria-hidden="true" />
         </button>
         <button class="icon-button" id="open-background-picker" type="button" aria-label="Change background">
-          🖼️
+          <img class="icon-button__img" src="assets/img_disabled.svg" alt="" aria-hidden="true" />
         </button>
       </div>
 
@@ -301,7 +301,9 @@
     </div>
 
     <!-- Easter egg: light theme -->
-    <button id="light-theme-btn" class="light-theme-btn" type="button">☀️ Light theme</button>
+    <button id="light-theme-btn" class="light-theme-btn" type="button" aria-label="Light theme">
+      <img class="icon-button__img" id="theme-button-icon" src="assets/theme_disabled.svg" alt="" aria-hidden="true" />
+    </button>
     <div class="light-overlay" id="light-overlay" aria-hidden="true">
       <div class="light-overlay__text" id="light-overlay-text">Иди на хуй!</div>
     </div>
@@ -332,10 +334,14 @@
 
       // Easter egg: light theme
       const lightThemeButton = document.getElementById('light-theme-btn');
+      const themeButtonIcon = document.getElementById('theme-button-icon');
       const lightOverlay = document.getElementById('light-overlay');
       const lightOverlayText = document.getElementById('light-overlay-text');
 
       lightThemeButton.addEventListener('click', () => {
+        if (themeButtonIcon) {
+          themeButtonIcon.src = 'assets/theme_enabled.svg';
+        }
         lightThemeButton.style.display = 'none';
         lightOverlay.classList.add('is-active');
         lightOverlay.setAttribute('aria-hidden', 'false');
@@ -367,6 +373,10 @@
       const iconFileInput = document.getElementById('icon-file');
       const iconUrlInput = document.getElementById('icon-url');
       const uploadPreview = document.getElementById('upload-preview');
+      const addServiceIcon = addServiceButton.querySelector('.icon-button__img');
+      const editModeIcon = editModeButton.querySelector('.icon-button__img');
+      const removeModeIcon = removeModeButton.querySelector('.icon-button__img');
+      const backgroundIcon = backgroundButton.querySelector('.icon-button__img');
       const settingsApiUrl = '/api/settings';
       const servicesApiUrl = '/api/services';
       const uploadApiUrl = '/api/upload';
@@ -435,6 +445,13 @@
         editModeButton.classList.toggle('is-edit-active', isEditMode);
         removeModeButton.classList.toggle('is-active', isRemovalMode);
         removeModeButton.classList.toggle('is-remove-active', isRemovalMode);
+
+        if (editModeIcon) {
+          editModeIcon.src = isEditMode ? 'assets/edit_enabled.svg' : 'assets/edit_disabled.svg';
+        }
+        if (removeModeIcon) {
+          removeModeIcon.src = isRemovalMode ? 'assets/delete_enabled.svg' : 'assets/delete_disabled.svg';
+        }
       };
 
       const forceClearRemovalButton = () => {
@@ -540,7 +557,7 @@
       const resolveIconUrl = icon => {
         const normalized = normalizeStoredPath(icon);
         if (!normalized) {
-          return 'assets/images/tool.png';
+          return 'assets/no-image-svgrepo-com.svg';
         }
         return normalized;
       };
@@ -578,7 +595,7 @@
             return;
           }
           image.dataset.fallbackApplied = '1';
-          image.src = 'assets/images/tool.png';
+          image.src = 'assets/no-image-svgrepo-com.svg';
         };
         image.addEventListener('error', handleImageError);
         iconWrapper.appendChild(image);

@@ -134,7 +134,11 @@ def normalize_icon_path(icon: str) -> str:
         return f"/{icon}"
     if icon.startswith("/assets/images/"):
         return icon
+    if icon.startswith("/assets/"):
+        return icon
     if icon.startswith("assets/images/"):
+        return f"/{icon}"
+    if icon.startswith("assets/"):
         return f"/{icon}"
     if icon.startswith("http://") or icon.startswith("https://"):
         return icon
@@ -148,6 +152,12 @@ def cleanup_unused_uploads(services_data: list[dict]) -> None:
         icon = normalize_icon_path(str(service.get("icon", "")))
         if icon.startswith("/uploads/"):
             used_files.add(icon.replace("/uploads/", ""))
+
+    settings = load_settings()
+    background_url = str(settings.get("backgroundUrl", "")) if isinstance(settings, dict) else ""
+    background_icon = normalize_icon_path(background_url)
+    if background_icon.startswith("/uploads/"):
+        used_files.add(background_icon.replace("/uploads/", ""))
 
     for file_path in UPLOADS_DIR.iterdir():
         if file_path.is_file() and file_path.name not in used_files:

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 279.61 279.61">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #333;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #333;
+        stroke-miterlimit: 10;
+        stroke-width: 20px;
+      }
+    </style>
+  </defs>
+  <polygon class="cls-1" points="175.11 122.13 172.59 131.54 103.18 112.94 100.27 102.07 175.11 122.13"/>
+  <polygon class="cls-1" points="166.66 153.68 166.66 153.69 164.13 163.09 112.94 149.38 110.03 138.51 166.66 153.68"/>
+  <polygon class="cls-1" points="158.2 185.24 155.68 194.65 122.71 185.82 119.79 174.95 158.2 185.24"/>
+  <polygon class="cls-2" points="224.02 54.66 178.4 224.95 102.35 224.95 56.73 54.66 224.02 54.66"/>
+</svg>

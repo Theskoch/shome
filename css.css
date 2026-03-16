@@ -79,6 +79,13 @@ body {
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
+.icon-button__img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
 .icon-button:hover {
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.2);
