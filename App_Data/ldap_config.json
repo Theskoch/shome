@@ -1,0 +1,11 @@
+{
+  "server_uri": "ldap://home.local",
+  "use_ssl": false,
+  "bind_dn": "CN=ldap-reader,DC=home,DC=local",
+  "bind_password": "CHANGE_ME",
+  "search_base": "DC=home,DC=local",
+  "search_filter": "(sAMAccountName={username})",
+  "required_group_dn": "CN=HomeServicesUsers,OU=Groups,DC=home,DC=local",
+  "session_days": 30,
+  "secret_key": "CHANGE_ME_TO_RANDOM_STRING"
+}
