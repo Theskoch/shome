@@ -1,6 +1,8 @@
 import json
 import mimetypes
+import os
 import sys
+import threading
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
@@ -10,17 +12,68 @@ BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR / "_pydeps"))
 
 from flask import Flask, jsonify, request, send_from_directory, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 from ldap3 import Connection, Server
 
-APP_DATA_DIR = BASE_DIR / "App_Data"
-UPLOADS_DIR = BASE_DIR / "uploads"
+
+def env_path(name: str, default: Path) -> Path:
+    """Read a path from the environment, falling back to the legacy layout."""
+    value = os.environ.get(name, "").strip()
+    return Path(value) if value else default
+
+
+APP_DATA_DIR = env_path("SHOME_APP_DATA_DIR", BASE_DIR / "App_Data")
+UPLOADS_DIR = env_path("SHOME_UPLOADS_DIR", BASE_DIR / "uploads")
 SERVICES_FILE = APP_DATA_DIR / "services.json"
 SETTINGS_FILE = APP_DATA_DIR / "settings.json"
-LDAP_CONFIG_FILE = APP_DATA_DIR / "ldap_config.json"
+LDAP_CONFIG_FILE = env_path("SHOME_LDAP_CONFIG", APP_DATA_DIR / "ldap_config.json")
 
-app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
+# Only assets/ is served as static. Pointing this at BASE_DIR would expose
+# app.py, App_Data/ldap_config.json and .git/ to unauthenticated requests.
+app = Flask(__name__, static_folder=str(BASE_DIR / "assets"), static_url_path="/assets")
 _uploads_name_map_cache: Optional[Dict[str, str]] = None
+
+# Uploads are served back from our own origin, so anything that a browser can
+# execute (.html, .svg with script, .php on a future host) is off the table.
+ALLOWED_UPLOAD_EXTENSIONS = {
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp",
+    ".ico", ".tiff", ".tif", ".avif", ".heic", ".heif",
+}
+
+# Login throttling: LOGIN_MAX_ATTEMPTS failures from one client, then a
+# LOGIN_BLOCK_MINUTES pause, then a fresh batch of attempts. Keeps LDAP
+# brute-force from tripping Active Directory account lockout policies.
+LOGIN_MAX_ATTEMPTS = int(os.environ.get("SHOME_LOGIN_MAX_ATTEMPTS", "10"))
+LOGIN_BLOCK_MINUTES = int(os.environ.get("SHOME_LOGIN_BLOCK_MINUTES", "5"))
+
+# Number of reverse proxies in front of us (Nginx Proxy Manager => 1).
+# ProxyFix reads the entry *our* proxy appended to X-Forwarded-For, counting
+# from the right. Parsing the header by hand and taking the first entry would
+# be spoofable: the left-hand entries come from the client.
+TRUSTED_PROXY_HOPS = int(os.environ.get("SHOME_TRUST_PROXY", "0"))
+if TRUSTED_PROXY_HOPS > 0:
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=TRUSTED_PROXY_HOPS,
+        x_proto=TRUSTED_PROXY_HOPS,
+        x_host=TRUSTED_PROXY_HOPS,
+    )
+
+# Session cookie over HTTPS only. Safe to enable behind a TLS-terminating
+# proxy; leave off when the portal is opened by plain http://ip:port.
+if os.environ.get("SHOME_SECURE_COOKIES", "0") == "1":
+    app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# Cap uploads so a stray multi-gigabyte file cannot fill the data volume.
+app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("SHOME_MAX_UPLOAD_MB", "25")) * 1024 * 1024
+
+# State is in-memory, so the app must run in a single process (see gunicorn
+# flags in docker/Dockerfile: one worker, several threads).
+_login_attempts: Dict[str, Dict[str, object]] = {}
+_login_lock = threading.Lock()
 
 
 def ensure_storage():
@@ -67,8 +120,8 @@ def load_ldap_config() -> dict:
 
 
 def configure_session(config: dict) -> None:
-    app.secret_key = config.get("secret_key", "change-me")
-    days = int(config.get("session_days", 30))
+    app.secret_key = os.environ.get("SHOME_SECRET_KEY") or config.get("secret_key", "change-me")
+    days = int(os.environ.get("SHOME_SESSION_DAYS") or config.get("session_days", 30))
     app.permanent_session_lifetime = timedelta(days=days)
 
 
@@ -125,6 +178,48 @@ def authenticate_ldap(username: str, password: str, config: dict) -> tuple[bool,
         return True, ""
     except Exception as exc:
         return False, str(exc)
+
+
+def client_key() -> str:
+    """Identify the caller for throttling purposes.
+
+    ProxyFix has already rewritten remote_addr from X-Forwarded-For when
+    SHOME_TRUST_PROXY is set, so there is nothing to parse here.
+    """
+    return request.remote_addr or "unknown"
+
+
+def login_block_seconds(key: str) -> int:
+    """Seconds left in the pause, or 0 when the caller may try again."""
+    with _login_lock:
+        entry = _login_attempts.get(key)
+        if not entry:
+            return 0
+        blocked_until = entry.get("blocked_until")
+        if not isinstance(blocked_until, datetime):
+            return 0
+        remaining = (blocked_until - datetime.utcnow()).total_seconds()
+        if remaining <= 0:
+            # Pause served: drop the record so the caller gets a fresh batch.
+            _login_attempts.pop(key, None)
+            return 0
+        return int(remaining) + 1
+
+
+def register_login_failure(key: str) -> int:
+    """Count a failed attempt. Returns attempts left before the pause."""
+    with _login_lock:
+        entry = _login_attempts.setdefault(key, {"failures": 0, "blocked_until": None})
+        entry["failures"] = int(entry["failures"]) + 1
+        if int(entry["failures"]) >= LOGIN_MAX_ATTEMPTS:
+            entry["blocked_until"] = datetime.utcnow() + timedelta(minutes=LOGIN_BLOCK_MINUTES)
+            return 0
+        return LOGIN_MAX_ATTEMPTS - int(entry["failures"])
+
+
+def reset_login_failures(key: str) -> None:
+    with _login_lock:
+        _login_attempts.pop(key, None)
 
 
 def require_auth(handler):
@@ -213,13 +308,15 @@ def save_settings(data):
 
 def is_allowed(file_storage) -> bool:
     content_type = (getattr(file_storage, "mimetype", "") or "").lower()
-    if content_type.startswith("image/"):
-        return True
-
-    # Fallback: allow any file that has an extension.
-    # This keeps compatibility with uncommon image formats on different clients.
     filename = getattr(file_storage, "filename", "") or ""
-    return bool(Path(filename).suffix)
+    suffix = Path(filename).suffix.lower()
+
+    # A known image extension is enough: some clients send image bytes as
+    # application/octet-stream, and rejecting those broke real uploads.
+    if suffix:
+        return suffix in ALLOWED_UPLOAD_EXTENSIONS
+    # No extension: trust the declared type, the real one is derived below.
+    return content_type.startswith("image/")
 
 
 def extension_from_mimetype(content_type: str) -> str:
@@ -252,6 +349,17 @@ def redirect_to_login():
         "<body><a href=\"/login\">Go to sign in</a></body></html>",
         302,
     )
+
+
+@app.errorhandler(413)
+def too_large(_error):
+    limit_mb = app.config["MAX_CONTENT_LENGTH"] // (1024 * 1024)
+    return jsonify({"success": False, "message": f"Файл слишком большой (лимит {limit_mb} МБ)"}), 413
+
+
+@app.route("/css.css")
+def stylesheet():
+    return send_from_directory(BASE_DIR, "css.css")
 
 
 @app.route("/")
@@ -296,11 +404,28 @@ def auth_login():
     if not username or not password:
         return jsonify({"success": False, "message": "Enter username and password"}), 400
 
+    key = client_key()
+    blocked = login_block_seconds(key)
+    if blocked:
+        minutes, seconds = divmod(blocked, 60)
+        wait = f"{minutes} мин {seconds} сек" if minutes else f"{seconds} сек"
+        return (
+            jsonify({"success": False, "message": f"Слишком много попыток. Повторите через {wait}"}),
+            429,
+        )
+
     config = load_ldap_config()
     ok, error = authenticate_ldap(username, password, config)
     if not ok:
-        return jsonify({"success": False, "message": error or "Authentication failed"}), 401
+        left = register_login_failure(key)
+        message = error or "Authentication failed"
+        if left == 0:
+            message = f"Слишком много попыток. Вход заблокирован на {LOGIN_BLOCK_MINUTES} мин"
+        elif left <= 3:
+            message = f"{message}. Осталось попыток: {left}"
+        return jsonify({"success": False, "message": message}), 401
 
+    reset_login_failures(key)
     session["user"] = username
     session.permanent = True
     return jsonify({"success": True})
@@ -384,6 +509,12 @@ def upload():
     safe_name = secure_filename(file.filename)
     if not Path(safe_name).suffix:
         safe_name = f"{safe_name}{extension_from_mimetype(getattr(file, 'mimetype', '') or '')}"
+
+    # secure_filename() and the mimetype fallback can both change the extension,
+    # so the name we are about to write is checked, not the one we were given.
+    if Path(safe_name).suffix.lower() not in ALLOWED_UPLOAD_EXTENSIONS:
+        return jsonify({"success": False, "message": "Unsupported file type"}), 400
+
     target_name = f"{timestamp}_{safe_name}"
     target_path = UPLOADS_DIR / target_name
     file.save(target_path)
@@ -393,11 +524,22 @@ def upload():
 
 
 @app.route("/uploads/<path:filename>")
+@require_auth
 def uploaded_file(filename):
-    return send_from_directory(UPLOADS_DIR, filename)
+    response = send_from_directory(UPLOADS_DIR, filename)
+    # Belt and braces for SVG: harmless inside <img>, but opening one directly
+    # would otherwise run its script on our origin.
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Content-Security-Policy"] = "default-src 'none'; sandbox"
+    return response
 
+
+ensure_storage()
 
 if __name__ == "__main__":
-    ensure_storage()
     configure_session(load_ldap_config())
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(
+        host=os.environ.get("SHOME_HOST", "0.0.0.0"),
+        port=int(os.environ.get("SHOME_PORT", "8080")),
+        debug=os.environ.get("SHOME_DEBUG", "0") == "1",
+    )

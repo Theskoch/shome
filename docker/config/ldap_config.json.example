@@ -1,0 +1,22 @@
+{
+  "_comment": "Скопируй в ldap_config.json и заполни. Полная таблица ключей — в README.md проекта.",
+
+  "server_uri": "ldap://dc1.home.local",
+  "use_ssl": false,
+
+  "_режим_1": "Поиск через сервисную учётку (обычный вариант для AD): bind_dn + bind_password + search_base + search_filter",
+  "bind_dn": "CN=ldap-reader,CN=Users,DC=home,DC=local",
+  "bind_password": "CHANGE_ME",
+  "search_base": "DC=home,DC=local",
+  "search_filter": "(sAMAccountName={username})",
+
+  "_режим_2": "Альтернатива без сервисной учётки — раскомментируй user_dn_template и убери четыре ключа выше. Если он задан, он выигрывает.",
+  "__user_dn_template": "uid={username},ou=users,dc=home,dc=local",
+
+  "_группа": "Необязательно: пускать только членов группы. DN должен совпадать точь-в-точь со значением в memberOf.",
+  "required_group_dn": "CN=HomeServicesUsers,OU=Groups,DC=home,DC=local",
+
+  "_сессия": "secret_key можно не указывать, если задан SHOME_SECRET_KEY в .env. Сгенерировать: openssl rand -hex 32",
+  "session_days": 30,
+  "secret_key": "CHANGE_ME_TO_RANDOM_STRING"
+}

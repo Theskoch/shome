@@ -1,0 +1,56 @@
+services:
+  shome:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: shome-dashboard:latest
+    container_name: shome
+    restart: unless-stopped
+
+    # Порт наружу. За Nginx Proxy Manager он НЕ нужен: NPM ходит в контейнер
+    # по внутренней сети, а публикация порта оставляет обход прокси и TLS
+    # по http://<ip-сервера>:8082. Закомментируй блок, когда настроишь NPM.
+    # Нужен прямой доступ для отладки — оставь, но лучше "127.0.0.1:8082:8080".
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+
+    environment:
+      TZ: ${TZ:-Europe/Moscow}
+      # Если задан — переопределяет secret_key из ldap_config.json.
+      SHOME_SECRET_KEY: ${SHOME_SECRET_KEY:-}
+      SHOME_SESSION_DAYS: ${SHOME_SESSION_DAYS:-30}
+      SHOME_LOGIN_MAX_ATTEMPTS: ${SHOME_LOGIN_MAX_ATTEMPTS:-10}
+      SHOME_LOGIN_BLOCK_MINUTES: ${SHOME_LOGIN_BLOCK_MINUTES:-5}
+      # Сколько реверс-прокси перед нами. За NPM — 1, напрямую — 0.
+      SHOME_TRUST_PROXY: ${SHOME_TRUST_PROXY:-0}
+      # 1 — только если портал открывается по https (NPM с сертификатом).
+      SHOME_SECURE_COOKIES: ${SHOME_SECURE_COOKIES:-0}
+      SHOME_MAX_UPLOAD_MB: ${SHOME_MAX_UPLOAD_MB:-25}
+
+    # От чьего имени пишутся файлы в ./data. Должен совпадать с владельцем каталога,
+    # иначе контейнер не сможет сохранять карточки и загрузки.
+    user: "${PUID:-1000}:${PGID:-1000}"
+
+    volumes:
+      # Конфиг: правится на хосте, контейнеру только на чтение.
+      - ./config:/config:ro
+      # Состояние: карточки, настройки UI, загруженные картинки.
+      - ./data:/data
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/login', timeout=4).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # Сеть Nginx Proxy Manager. Раскомментируй вместе с блоком networks внизу,
+    # подставив имя своей сети (docker network ls). Тогда в NPM указываешь
+    # Forward Hostname = shome, Forward Port = 8080.
+    # networks:
+    #   - npm
+
+# networks:
+#   npm:
+#     external: true
+#     name: ${NPM_NETWORK:-nginx-proxy-manager_default}

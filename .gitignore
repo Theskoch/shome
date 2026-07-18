@@ -2,3 +2,11 @@ App_Data/
 uploads/
 _pydeps/
 .venv/
+.DS_Store
+__pycache__/
+*.pyc
+
+# Docker: секреты и состояние остаются на хосте, в git не едут.
+docker/.env
+docker/config/ldap_config.json
+docker/data/

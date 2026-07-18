@@ -1,0 +1,15 @@
+# Build context is the project root. Keep the image to code + assets only.
+.git
+.gitignore
+.DS_Store
+.venv
+_pydeps
+App_Data
+uploads
+docker
+# ...кроме списка зависимостей — он нужен на этапе сборки.
+!docker/requirements.txt
+README.md
+CLAUDE.md
+**/__pycache__
+**/*.pyc

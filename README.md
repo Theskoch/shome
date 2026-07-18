@@ -30,26 +30,40 @@ App_Data/
 
 ---
 
-## Быстрый старт (для любого человека)
+## Быстрый старт
 
-### 1) Требования
+### Вариант 1: Docker Compose (рекомендуется)
+
+Конфиг и данные лежат на хосте рядом с compose, в образе только код —
+пересборка их не трогает. Подробности в **[docker/README.md](docker/README.md)**.
+
+```bash
+cd docker
+cp .env.example .env            # порт, ключ сессий, UID/GID
+nano config/ldap_config.json    # server_uri, bind_password, search_base
+docker compose up -d
+```
+
+### Вариант 2: локально
+
+#### 1) Требования
 
 - Python **3.10+**
 - Доступ к LDAP/AD серверу
 
-### 2) Установка зависимостей
+#### 2) Установка зависимостей
 
-В проекте уже используется локальная папка `_pydeps`, но если запускаете с нуля — установите:
+В проекте есть папка `_pydeps` со времён IIS, но `ldap3` в ней нет — ставьте зависимости сами:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install flask ldap3 werkzeug
+pip install -r docker/requirements.txt
 ```
 
-### 3) Настройка LDAP
+#### 3) Настройка LDAP
 
-Заполните файл `App_Data/ldap_config.json`.
+Заполните файл `App_Data/ldap_config.json` (в Docker — `docker/config/ldap_config.json`).
 
 Минимальный рабочий пример:
 
@@ -69,7 +83,7 @@ pip install flask ldap3 werkzeug
 
 > ⚠️ Обязательно замените `bind_password` и `secret_key`.
 
-### 4) Запуск
+#### 4) Запуск
 
 ```bash
 python3 app.py
@@ -78,6 +92,9 @@ python3 app.py
 По умолчанию приложение поднимется на:
 
 - `http://localhost:8080`
+
+Порт меняется переменной `SHOME_PORT`, отладка включается `SHOME_DEBUG=1`.
+Полный список переменных — в [CLAUDE.md](CLAUDE.md).
 
 ---
 
@@ -148,7 +165,20 @@ python3 app.py
 
 ## Безопасность (важно)
 
-- Не коммитьте реальные пароли в `ldap_config.json`
-- Используйте длинный случайный `secret_key`
-- Для production лучше запускать за reverse proxy (Nginx/Caddy) + HTTPS
-- В production отключите `debug=True` в `app.py`
+- Не коммитьте реальные пароли в `ldap_config.json` — он в `.gitignore`
+- Используйте длинный случайный `secret_key`: `openssl rand -hex 32`
+- Для production лучше запускать за reverse proxy (Nginx/Caddy) + HTTPS.
+  За прокси включайте `SHOME_TRUST_PROXY=1`, иначе защита от перебора
+  посчитает всех клиентов одним IP
+- Debug выключен по умолчанию, включается только через `SHOME_DEBUG=1`
+
+### Что закрыто
+
+- **Статика.** Раздаётся только `assets/`. Раньше `static_folder` смотрел в корень проекта,
+  и `/App_Data/ldap_config.json` (с паролем bind-учётки), `/app.py` и `/.git/` отдавались
+  без авторизации. Если где-то остался старый деплой — там эта дыра ещё живая.
+- **Перебор паролей.** 10 попыток с одного IP, затем пауза 5 минут, затем новые 10
+  (`SHOME_LOGIN_MAX_ATTEMPTS`, `SHOME_LOGIN_BLOCK_MINUTES`). Иначе перебор идёт прямо в AD
+  и лочит доменные учётки.
+- **Загрузки.** Принимаются только картинки по белому списку расширений; `/uploads/*` требует
+  сессию и отдаётся с `nosniff` + CSP (иначе SVG со скриптом выполнялся бы на своём origin).
