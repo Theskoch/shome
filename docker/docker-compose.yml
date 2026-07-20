@@ -37,6 +37,11 @@ services:
       # Состояние: карточки, настройки UI, загруженные картинки.
       - ./data:/data
 
+    # DNS домена: без него контейнер не резолвит имена контроллеров (host DNS
+    # ему не наследуется). IP — сервера DNS вашего AD-домена.
+    dns:
+      - 100.100.10.110
+
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/login', timeout=4).status == 200 else 1)"]
       interval: 30s

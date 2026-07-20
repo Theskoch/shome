@@ -164,7 +164,20 @@ tar czf shome-backup-$(date +%F).tar.gz docker/config docker/data
 
 **Контейнер не видит контроллер домена** — проверь из контейнера:
 `docker compose exec shome python -c "import socket; print(socket.gethostbyname('dc1.home.local'))"`.
-Если DNS домена не резолвится, пропиши `dns:` в compose или используй IP в `server_uri`.
+Если упало с `[Errno -3] Temporary failure in name resolution` — контейнер не наследует DNS
+хоста и не резолвит внутренние имена. В `docker-compose.yml` уже прописан блок:
+
+```yaml
+    dns:
+      - 100.100.10.110
+```
+
+Замени IP на адрес своего DNS-сервера (обычно это DNS вашего AD-домена), после правки —
+`docker compose up -d` (пересоздание контейнера, `restart` этого не подхватит).
+Если DNS в порядке, но всё равно не резолвится — используй IP в `server_uri` напрямую.
+
+Ошибка LDAP-логина в этом случае выглядит как `invalid server address` на странице входа —
+это `ldap3` глушит `socket.gaierror` и просто не находит ни одного адреса для подключения.
 
 **Иконки не грузятся** — файлы должны лежать в `data/uploads/`. Пути в `services.json` вида
 `/uploads/<имя>`; если переезжаешь со старой установки, перенеси туда содержимое `uploads/`.

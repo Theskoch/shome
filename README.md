@@ -130,9 +130,57 @@ python3 app.py
 
 ## Где хранятся данные
 
-- `App_Data/services.json` — карточки сервисов
-- `App_Data/settings.json` — фон и другие UI-настройки
-- `uploads/` — загруженные картинки
+Локальный запуск (`python3 app.py`) и Docker используют одну и ту же структуру,
+просто по разным путям на хосте:
+
+| Что | Локально | В Docker (на хосте, рядом с compose) |
+|---|---|---|
+| Карточки сервисов | `App_Data/services.json` | `docker/data/App_Data/services.json` |
+| Фон и настройки UI | `App_Data/settings.json` | `docker/data/App_Data/settings.json` |
+| Конфиг LDAP | `App_Data/ldap_config.json` | `docker/config/ldap_config.json` |
+| Загруженные картинки (иконки + фон) | `uploads/` | `docker/data/uploads/` |
+
+### Формат `services.json`
+
+Плоский массив карточек, порядок в файле = порядок на дашборде:
+
+```json
+[
+  {
+    "id": "уникальная строка (генерируется фронтом, можно любую)",
+    "title": "Подпись под иконкой",
+    "url": "https://example.home.local",
+    "icon": "/uploads/имя_файла.png",
+    "isModal": false
+  }
+]
+```
+
+`icon` — путь вида `/uploads/<файл>` (или полный `http(s)://` для внешней картинки).
+Сам файл должен реально лежать в `uploads/` — сохранение через UI удаляет из
+`uploads/` всё, на что нет ссылки ни в одной карточке, ни в `backgroundUrl` (см. ниже).
+
+### Формат `settings.json`
+
+```json
+{ "backgroundUrl": "/uploads/имя_файла_фона.jpg" }
+```
+
+Если файла нет или он пустой — фон не задан, дашборд рисует пустой чёрный/тёмный фон по умолчанию.
+
+### Перенос со старого сервера — по шагам
+
+1. Скопировать `services.json` → `App_Data/services.json` (или `docker/data/App_Data/`).
+2. Скопировать `settings.json`, если есть фон, туда же.
+3. Скопировать **все** файлы из старого `uploads/`, на которые ссылаются `icon` в
+   `services.json` и `backgroundUrl` в `settings.json`, в новый `uploads/`.
+4. В Docker — выставить владельца `PUID:PGID` из `.env` на `data/`:
+   `chown -R <PUID>:<PGID> docker/data`.
+5. Открыть дашборд и убедиться, что все карточки и фон отображаются —
+   и только после этого трогать кнопки добавления/редактирования в UI.
+   Любое сохранение через UI перезаписывает `services.json` целиком и подчищает
+   `uploads/` — если часть файлов на шаге 3 забыли скопировать, они удалятся
+   как «неиспользуемые» при первом же сохранении.
 
 ---
 
